@@ -1,0 +1,201 @@
+name: data process other
+description: |
+  单个样本的数据释放module
+options:
+  - name: r1_paths_str
+    desc: raw的r1字符串
+    type: string
+    required: True
+  - name: r2_paths_str
+    desc: raw的r2字符串
+    type: string
+    required: True
+  - name: r1_clean_paths_str
+    desc: clean的r1字符串
+    type: string
+    required: True
+  - name: r2_clean_paths_str
+    desc: clean的r2字符串
+    type: string
+    required: True
+  - name: exist_s3_clean
+    desc: 释放存在s3的clean,此时需要质控
+    type: string
+    required: True
+  - name: product_type
+    desc: 拆分类型
+    type: string
+    required: True
+  - name: specimen_name
+    desc: 样本名
+    type: string
+    required: True
+  - name: sample_id
+    desc: 样本标识
+    type: string
+    required: True
+  - name: tuple_number
+    desc: 要合并的样本数量
+    type: string
+    required: True
+  - name: merge_st
+    desc: 是否要合并
+    type: string
+    required: True
+  - name: rename_st
+    desc: 是否要改名
+    type: string
+    required: True
+  - name: sample_rename
+    desc: 要改成的样本名
+    type: string
+    required: True
+  - name: qc_st
+    desc: 是否要质控
+    type: string
+    required: True
+  - name: qc_params
+    desc: 质控参数表
+    type: infile
+    format: datasplit_v3.data_release.qc_params
+    required: True
+bindings:
+  length_required: $qc_params.length_required
+  cut_mean_quality: $qc_params.cut_mean_quality
+  n_base_limit: $qc_params.n_base_limit
+  qualified_quality_phred: $qc_params.qualified_quality_phred
+  cut_by_quality3: $qc_params.cut_by_quality3
+  cut_by_quality5: $qc_params.cut_by_quality5
+  adapter_sequence: $qc_params.adapter_sequence
+  adapter_sequence_r2: $qc_params.adapter_sequence_r2
+  cut_window_size: $qc_params.cut_window_size
+diagram: |
+  [*]                          -->   r1_raw_merge
+  [*]                          -->   r2_raw_merge
+  [*]                          -->   r1_clean_merge
+  [*]                          -->   r2_clean_merge
+  r1_raw_merge                 -->   sample_rename_other
+  r2_raw_merge                 -->   sample_rename_other
+  r1_clean_merge               -->   sample_rename_other
+  r2_clean_merge               -->   sample_rename_other
+  sample_rename_other          -->   sample_qc_norename
+  sample_rename_other          -->   sample_qc_rename
+  sample_qc_norename           -->   md5sum
+  sample_qc_rename             -->   md5sum
+  md5sum                       -->   [*]
+phase_configs:
+  - phase_name: r1_raw_merge
+    phase_desc: meta_r1_raw数据s3路径下载和合并
+    type: module
+    name: datasplit_v3.data_release.data_merge
+    option:
+      paths_str: "{r1_paths_str}"
+      tuple_number: "{tuple_number}"
+      sample_id: "{sample_id}"
+      suffix: "R1.raw.fastq.gz"
+    log: "Step 01: r1_raw数据下载并合并"
+    publish: "01.r1_raw_merge_data"
+    whenif: $judge_merge_rename_qc1
+  - phase_name: r2_raw_merge
+    phase_desc: r2_raw数据s3路径下载和合并
+    type: module
+    name: datasplit_v3.data_release.data_merge
+    option:
+      paths_str: "{r2_paths_str}"
+      tuple_number: "{tuple_number}"
+      sample_id: "{sample_id}"
+      suffix: "R2.raw.fastq.gz"
+    log: "Step 01: r2_raw数据下载并合并"
+    publish: "01.r2_raw_merge_data"
+    whenif: $judge_merge_rename_qc1
+  - phase_name: r1_clean_merge
+    phase_desc: r1_clean数据s3路径下载和合并
+    type: module
+    name: datasplit_v3.data_release.data_merge
+    option:
+      paths_str: "{r1_clean_paths_str}"
+      tuple_number: "{tuple_number}"
+      sample_id: "{sample_id}"
+      suffix: "R1.clean.fastq.gz"
+    log: "Step 01: r1_clean数据下载并合并"
+    publish: "01.r1_clean_merge_data"
+    whenif: $judge_merge_rename_qc2
+  - phase_name: r2_clean_merge
+    phase_desc: r2_clean数据s3路径下载和合并
+    type: module
+    name: datasplit_v3.data_release.data_merge
+    option:
+      paths_str: "{r2_clean_paths_str}"
+      tuple_number: "{tuple_number}"
+      sample_id: "{sample_id}"
+      suffix: "R2.clean.fastq.gz"
+    log: "Step 01: r2_clean数据下载并合并"
+    publish: "01.r2_clean_merge_data"
+    whenif: $judge_merge_rename_qc2
+  - phase_name: sample_rename_other
+    phase_desc: 整理文件
+    name: datasplit_v3.data_release.specimen_rename
+    option:
+      r1_raw_fastq: "{output_dir}/01.r1_raw_merge_data/merge_fastq/{sample_id}.R1.raw.fastq.gz"
+      r2_raw_fastq: "{output_dir}/01.r2_raw_merge_data/merge_fastq/{sample_id}.R2.raw.fastq.gz"
+      r1_clean_fastq: "{output_dir}/01.r1_clean_merge_data/merge_fastq/{sample_id}.R1.clean.fastq.gz"
+      r2_clean_fastq: "{output_dir}/01.r2_clean_merge_data/merge_fastq/{sample_id}.R2.clean.fastq.gz"
+      r1_raw_suffix: "R1.raw.fastq.gz"
+      r2_raw_suffix: "R2.raw.fastq.gz"
+      r1_clean_suffix: "R1.clean.fastq.gz"
+      r2_clean_suffix: "R2.clean.fastq.gz"
+      rename_st: "{rename_st}"
+      specimen_name: "{specimen_name}"
+      specimen_rename: "{sample_rename}"
+    log: "Step 02: 样本重命名"
+    publish: "{product_type}_{merge_st}"
+    whenif: $judge_merge_rename_qc1
+  - phase_name: sample_qc_norename
+    phase_desc: 常规fastp质控
+    name: datasplit_v3.data_release.qc_fastp
+    option:
+      fastq_r1: "{output_dir}/01.r1_raw_merge_data/merge_fastq/{sample_id}.R1.raw.fastq.gz"
+      fastq_r2: "{output_dir}/01.r2_raw_merge_data/merge_fastq/{sample_id}.R2.raw.fastq.gz"
+      specimen_rename: "{specimen_name}"
+      length_required: "{length_required}"
+      cut_mean_quality: "{cut_mean_quality}"
+      n_base_limit: "{n_base_limit}"
+      qualified_quality_phred: "{qualified_quality_phred}"
+      cut_by_quality3: "{cut_by_quality3}"
+      cut_by_quality5: "{cut_by_quality5}"
+      adapter_sequence: "{adapter_sequence}"
+      adapter_sequence_r2: "{adapter_sequence_r2}"
+      cut_window_size: "{cut_window_size}"
+      product_type: "{product_type}"
+    log: "开始质控"
+    publish: "{product_type}_{merge_st}"
+    whenif: $judge_qc_2
+  - phase_name: sample_qc_rename
+    phase_desc: 常规fastp质控
+    name: datasplit_v3.data_release.qc_fastp
+    option:
+      fastq_r1: "{output_dir}/01.r1_raw_merge_data/merge_fastq/{sample_id}.R1.raw.fastq.gz"
+      fastq_r2: "{output_dir}/01.r2_raw_merge_data/merge_fastq/{sample_id}.R2.raw.fastq.gz"
+      specimen_rename: "{sample_rename}"
+      length_required: "{length_required}"
+      cut_mean_quality: "{cut_mean_quality}"
+      n_base_limit: "{n_base_limit}"
+      qualified_quality_phred: "{qualified_quality_phred}"
+      cut_by_quality3: "{cut_by_quality3}"
+      cut_by_quality5: "{cut_by_quality5}"
+      adapter_sequence: "{adapter_sequence}"
+      adapter_sequence_r2: "{adapter_sequence_r2}"
+      cut_window_size: "{cut_window_size}"
+      product_type: "{product_type}"
+    log: "开始质控"
+    publish: "{product_type}_{merge_st}"
+    whenif: $judge_qc_1
+  - phase_name: md5sum
+    phase_desc: rename后文件的md5sum值
+    name: datasplit_v3.data_release.datasplit_md5sum
+    option:
+      dir: "{output_dir}/{product_type}_{merge_st}"
+      prefix: "md5sum"
+    log: "开始计算的md5sum值"
+    publish: "{product_type}_{merge_st}"
+    whenif: $judge_merge_rename_qc1

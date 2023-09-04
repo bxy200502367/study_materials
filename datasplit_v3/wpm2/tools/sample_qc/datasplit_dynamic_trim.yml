@@ -1,0 +1,35 @@
+name: run dynamic trim
+description: |
+  DynamicTrim.pl 用于miRNA质控去低值
+output: |
+  {sample_id}.clip_s.fastq.trimmed
+cpu: 2
+mem: 10G
+queue: chaifen
+global_var:
+  - perl
+  - dynamic_trim
+options:
+  - name: clip_fastq
+    desc: 去完接头的fastq
+    type: string
+    default: True
+  - name: phred_score
+    desc: Phred得分（在0到40之间）
+    type: int
+    default: 20
+  - name: quality
+    desc: fastq质量体系
+    type: string
+    default: sanger
+  - name: sample_id
+    desc: 样本名称，用于标识
+    type: string
+    required: True
+cmds:
+  - name: run_dynamic_trim
+    shell: True
+    formatter: >
+      {perl} {dynamic_trim} -h {phred_score} -bwa
+publish:
+  - pattern: "{sample_id}.clip_s.fastq.trimmed"

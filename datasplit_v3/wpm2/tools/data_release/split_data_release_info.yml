@@ -1,0 +1,25 @@
+name: split data release info
+description: |
+  把一个任务单下的所有样本分成单个处理
+cpu: 1
+mem: 4G
+output: |
+  None
+env:
+  - LD_LIBRARY_PATH
+global_var:
+  - python3
+  - split_data_release_info
+options:
+  - name: data_release_info
+    desc: 分析单的数据释放信息
+    type: string
+    required: True
+  - name: sample_qc_params_dir
+    desc: 分析单的质控参数表
+    type: string
+    required: True
+cmds:
+  - name: run_split_data_release_info
+    formatter: >
+      {python3} {split_data_release_info} --infile {data_release_info} --qc_dir {sample_qc_params_dir} --outdir {output_dir}

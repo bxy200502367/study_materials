@@ -1,0 +1,32 @@
+name: pacbio stat len
+description: |
+  三代拆分结果reads长度统计
+cpu: 4
+mem: 8G
+output: |
+  {output_file}
+env:
+  - LD_LIBRARY_PATH
+global_var:
+  - seqkit
+  - cut
+options:
+  - name: fastq_dir
+    desc: 要统计的fastq文件夹
+    type: string
+    required: True
+  - name: match_pattern
+    desc: 文件匹配模式
+    type: string
+    required: True
+  - name: output_file
+    desc: 输出文件名
+    type: string
+    required: True
+cmds:
+  - name: run_pacbio_stat_len
+    shell: True
+    formatter: >
+      {seqkit} fx2tab -l -n -i {fastq_dir}/{match_pattern} | {cut} -f 2  | sort | uniq -c | sort -n -k2 > {work_dir}/{output_file}
+publish:
+  pattern: "{output_file}"

@@ -1,0 +1,43 @@
+name: data merge
+cpu: 1
+mem: 4G
+description: |
+  使用cat合并数据
+output: |
+  None
+env:
+  - LD_LIBRARY_PATH
+global_var:
+  - cp
+  - cat
+options:
+  - name: fastq_dir
+    desc: 存放要合并的文件夹
+    type: string
+    required: True
+  - name: tuple_number
+    desc: 要合并的样本数
+    type: string
+    required: True
+  - name: sample_id
+    desc: 样本标识
+    type: string
+    required: True
+  - name: suffix
+    desc: 后缀名
+    type: string
+    required: True
+bindings:
+    fq_str: $get_fq_str
+cmds:
+  - name: run_cat_samples
+    shell: True
+    formatter: >
+      {cp} {fq_str} {output_dir}/{sample_id}.{suffix}
+    whenif:
+      var: tuple_number
+      oprt: "=="
+      value: "1"
+    whenelse: >
+      {cat} {fq_str} > {output_dir}/{sample_id}.{suffix}
+  

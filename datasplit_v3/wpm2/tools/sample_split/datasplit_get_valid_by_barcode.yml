@@ -1,0 +1,49 @@
+name: get_valid_by_barcode
+description: |
+  运行getvaild_bybarcode,进行去低值
+output: |
+  {lane_name}--{library_number}.{key_id}.raw.valid.1.fq
+  {lane_name}--{library_number}.{key_id}.raw.valid.2.fq
+  {lane_name}--{library_number}.{key_id}.raw.seq2sam.stat
+  {lane_name}--{library_number}.{key_id}.raw.valid.stat
+cpu: 1
+mem: 4G
+queue: chaifen
+global_var:
+  - perl
+  - get_valid
+options:
+  - name: fastq_r1
+    desc: R1的fastq文件
+    type: string
+    required: True
+  - name: fastq_r2
+    desc: R2的fastq文件
+    type: string
+    required: True
+  - name: barcode_config
+    desc: barcode的配置文件
+    type: string
+    required: True
+  - name: library_number
+    desc: 文库名
+    type: string
+    required: True
+  - name: lane_name
+    desc: lane名
+    type: string
+    required: True
+  - name: key_id
+    desc: key_id名称
+    type: string
+    required: True
+    default: all
+cmds:
+  - name: run_get_valid_by_barcode
+    shell: True
+    formatter: >
+        {perl} {get_valid} {fastq_r1} {fastq_r2} {barcode_config} {lane_name}--{library_number}.{key_id}.raw
+publish:
+  - pattern: "{lane_name}--{library_number}.{key_id}.raw.valid.*.fq"
+  - pattern: "{lane_name}--{library_number}.{key_id}.raw.seq2sam.stat"
+  - pattern: "{lane_name}--{library_number}.{key_id}.raw.valid.stat"

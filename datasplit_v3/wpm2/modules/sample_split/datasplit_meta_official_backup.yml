@@ -1,0 +1,140 @@
+name: meta official
+description: |
+  二代官方多样性双端拆分module
+options:
+  - name: meta_official_info
+    desc: 非官方多样拆分文件,一个文库一个文件
+    type: infile
+    format: datasplit_v3.sample_split.meta_official_info
+    required: True
+  - name: length_required
+    desc: 长度过滤参数,fastp用
+    type: string
+    required: True
+  - name: cut_by_quality5
+    desc: fastp用
+    type: string
+    required: True
+  - name: cut_by_quality3
+    desc: fastp用
+    type: string
+    required: True
+  - name: cut_right_mean_quality
+    desc: fastp用
+    type: string
+    required: True
+  - name: cut_right_window_size
+    desc: fastp用
+    type: string
+    required: True
+  - name: min_length
+    desc: -m,两个reads之间所需的最小重叠长度,以提供可靠的重叠;flash使用
+    type: string
+    required: True
+  - name: max_length
+    desc: -M,两个reads之间的最大重叠长度
+    type: string
+    required: True
+  - name: mismatch_rate
+    desc: flash运行错赔率
+    type: string
+    required: True
+  - name: valid_length
+    desc: trim_fqseq专用,最长值
+    type: string
+    required: True
+  - name: min_len
+    desc: trim_fqseq专用,最短值
+    type: string
+    required: True
+  - name: mismatch
+    desc: 允许引物错配数
+    type: string
+    required: True
+  - name: split_type
+    desc: 拆分方式
+    type: string
+    picker:
+      - "Single"
+      - "Pair"
+      - "Auto"
+bindings:
+  lane_name: $meta_official_info.lane_name
+  library_number: $meta_official_info.library_number
+  fastq_r1_path: $meta_official_info.fastq_r1_path
+  fastq_r2_path: $meta_official_info.fastq_r2_path
+  trim_max_length: $meta_official_info.trim_max_length
+  trim_min_length: $meta_official_info.trim_min_length
+  its_primer: $meta_official_info.its_primer
+diagram: |
+  [*]                          -->   get_config
+  get_config                   -->   meta_official_pair
+  get_config                   -->   meta_official_single
+  meta_official_pair           -->   [*]
+  meta_official_single         -->   [*]
+phase_configs:
+  - phase_name: get_config
+    phase_desc: 预先获得配置文件
+    name: datasplit_v3.sample_split.datasplit_config
+    type: module
+    option:
+      meta_info: "{meta_official_info}"
+      lane_name: "{lane_name}"
+      library_number: "{library_number}"
+    publish: 01.config_info
+  - phase_name: meta_official_pair
+    phase_desc: 二代官方多样性双端拆分
+    name: datasplit_v3.sample_split.datasplit_meta_official_pair
+    type: module
+    option:
+      barcode_config: "{output_dir}/01.config_info/{lane_name}--{library_number}.all.barcode.xls"
+      primer_config: "{output_dir}/01.config_info/{lane_name}--{library_number}.all.primer.xls"
+      sample_primer_json: "{output_dir}/01.config_info/{lane_name}--{library_number}.all.sample_primer.json"
+      length_required: "{length_required}"
+      cut_by_quality5: "{cut_by_quality5}"
+      cut_by_quality3: "{cut_by_quality3}"
+      cut_right_mean_quality: "{cut_right_mean_quality}"
+      cut_right_window_size: "{cut_right_window_size}"
+      min_length: "{min_length}"
+      max_length: "{max_length}"
+      mismatch_rate: "{mismatch_rate}"
+      valid_length: "{valid_length}"
+      min_len: "{min_len}"
+      mismatch: "{mismatch}"
+      lane_name: "{lane_name}"
+      library_number: "{library_number}"
+      fastq_r1_path: "{fastq_r1_path}"
+      fastq_r2_path: "{fastq_r2_path}"
+      trim_max_length: "{trim_max_length}"
+      trim_min_length: "{trim_min_length}"
+    whenif: $is_pair
+    publish: ""
+    log: "运行二代官方多样性双端拆分module"
+  - phase_name: meta_official_single
+    phase_desc: 二代官方多样性单端拆分
+    name: datasplit_v3.sample_split.datasplit_meta_official_single
+    type: module
+    option:
+      barcode_config: "{output_dir}/01.config_info/{lane_name}--{library_number}.all.barcode.xls"
+      primer_config: "{output_dir}/01.config_info/{lane_name}--{library_number}.all.primer.xls"
+      sample_primer_json: "{output_dir}/01.config_info/{lane_name}--{library_number}.all.sample_primer.json"
+      length_required: "{length_required}"
+      cut_by_quality5: "{cut_by_quality5}"
+      cut_by_quality3: "{cut_by_quality3}"
+      cut_right_mean_quality: "{cut_right_mean_quality}"
+      cut_right_window_size: "{cut_right_window_size}"
+      min_length: "{min_length}"
+      max_length: "{max_length}"
+      mismatch_rate: "{mismatch_rate}"
+      valid_length: "{valid_length}"
+      min_len: "{min_len}"
+      mismatch: "{mismatch}"
+      lane_name: "{lane_name}"
+      library_number: "{library_number}"
+      fastq_r1_path: "{fastq_r1_path}"
+      fastq_r2_path: "{fastq_r2_path}"
+      trim_max_length: "{trim_max_length}"
+      trim_min_length: "{trim_min_length}"
+    whenif: $is_single
+    publish: ""
+    log: "运行二代非官方多样性单端拆分module"

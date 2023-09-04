@@ -1,0 +1,74 @@
+name: meta_fastp
+description: |
+  多样性fastp
+output: |
+  {lane_name}--{library_number}.trim.1.fq
+  {lane_name}--{library_number}.trim.2.fq
+  {lane_name}--{library_number}.json
+cpu: 3
+mem: 10G
+queue: chaifen
+global_var:
+  - fastp
+  - cp
+options:
+  - name: fastq_r1
+    desc: R1的fastq文件
+    type: infile
+    format: datasplit_v3.sample_split.fastq
+    required: True
+  - name: fastq_r2
+    desc: R2的fastq文件
+    type: infile
+    format: datasplit_v3.sample_split.fastq
+    required: True
+  - name: length_required
+    desc: -l,长度过滤参数，比此值短的读取将被丢弃
+    type: string
+    required: True
+  - name: cut_by_quality5
+    desc: -5,根据前面(5 ')的质量，允许每个读切割，默认是禁用的
+    type: string
+    required: True
+  - name: cut_by_quality3
+    desc: -3,根据后面(3 ')的质量，允许每个读切割，默认是禁用的
+    type: string
+    required: True
+  - name: cut_right_mean_quality
+    desc: cut_right的平均质量要求,默认20
+    type: string
+    required: True
+  - name: cut_right_window_size
+    desc: cut_right的窗口大小,默认4
+    type: string
+    required: True
+  - name: lane_name
+    desc: lane名字
+    type: string
+    required: True
+  - name: library_number
+    desc: 文库名字
+    type: string
+    required: True
+bindings:
+    fastqsize: $fastq_r1.filesize
+cmds:
+  - name: run_meta_fastp
+    shell: True
+    formatter: >
+        {software_dir}/{fastp} -i {fastq_r1} -I {fastq_r2} -o {work_dir}/{lane_name}--{library_number}.fastp.1.fq -O {work_dir}/{lane_name}--{library_number}.fastp.2.fq
+        -5 {cut_by_quality5} -3 {cut_by_quality3} --cut_right_window_size {cut_right_window_size} 
+        --cut_right_mean_quality {cut_right_mean_quality} --length_required {length_required} --json {work_dir}/{lane_name}--{library_number}.json
+        --html {work_dir}/{lane_name}--{library_number}.html
+    whenif:
+      var: fastqsize
+      oprt: ">"
+      value: 0
+    whenelse: >
+      {cp} {fastq_r1} {work_dir}/{lane_name}--{library_number}.fastp.1.fq
+      <--##-->
+      {cp} {fastq_r2} {work_dir}/{lane_name}--{library_number}.fastp.2.fq
+publish:
+  - pattern: "{lane_name}--{library_number}.fastp.1.fq"
+  - pattern: "{lane_name}--{library_number}.fastp.2.fq"
+  - pattern: "{lane_name}--{library_number}.json"

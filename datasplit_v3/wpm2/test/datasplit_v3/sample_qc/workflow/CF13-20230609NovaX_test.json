@@ -1,0 +1,21 @@
+{
+    "id": "CF13-20230609NovaX_20230612_test1-xu",
+    "type": "workflow",
+    "WPM": true,
+    "wfm_port": "7321",
+    "name": "datasplit_v3.sample_qc",
+    "client": "client01",
+    "CLUSTER": "clustre",
+    "IMPORT_REPORT_DATA": true,
+    "output": "s3nb2://datasplit/test/xu",
+    "to_file": [
+        "datasplit_v3.sample_qc.sample_qc.export_sample_qc_info(sample_qc_info)",
+        "datasplit_v3.sample_qc.sample_qc.export_sample_qc_params(sample_qc_params)"
+    ],
+
+    "options": {
+        "split_id": "64867cef8e2b9d3e2f2a6602",
+        "sample_qc_info": "64867cef8e2b9d3e2f2a6602",
+        "sample_qc_params": "64867cef8e2b9d3e2f2a6602"
+   }
+}

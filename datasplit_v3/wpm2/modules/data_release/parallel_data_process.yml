@@ -1,0 +1,26 @@
+name: parallel data process
+type: module
+description: |
+  基于样本名并行运行数据处理过程
+options:
+  - name: data_release_info_dir
+    desc: 一拆信息存放文件
+    type: infile
+    format: datasplit_v3.data_release.data_release_info_dir
+    required: True
+bindings:
+  dir_path: $get_dir_path
+diagram: |
+  [*]                   -->  data_process
+  data_process          -->  [*]
+phase_configs:
+  - phase_name: data_process
+    phase_desc: 基于释放文件夹并行运行数据处理过程
+    name: datasplit_v3.data_release.data_process
+    type: module
+    option:
+      one_release_specimen_info: "{scatter_value}"
+      one_qc_params_dir: "{data_release_info_dir}/{scatter_key}"
+    scatter: $data_release_info_dir.data_release_info_dict
+    log: "开始运行release_specimen_id {scatter_key} 的处理"
+    publish: "{scatter_key}"

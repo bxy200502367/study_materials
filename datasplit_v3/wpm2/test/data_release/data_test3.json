@@ -1,0 +1,22 @@
+{
+    "id": "data_release-20230807-test01",
+    "type": "workflow",
+    "WPM": true,
+    "wfm_port": "7321",
+    "name": "datasplit_v3.data_release",
+    "client": "client01",
+    "CLUSTER": "clustre",
+	"output": "s3nb2://datasplit/2023/data_release/test/",
+	"update_info": "{\"6465913ae5994944962871b2\": \"sg_data_release\"}",
+    "IMPORT_REPORT_DATA": true,
+	    "to_file": [
+        "datasplit_v3.data_release.data_release_v2.export_data_release_info(data_release_info)",
+        "datasplit_v3.data_release.data_release_v2.export_sample_qc_params(sample_qc_params_dir)"
+    ],
+
+    "options": {
+        "data_release_info": "6465913ae5994944962871b2",
+		"sample_qc_params_dir": "6465913ae5994944962871b2",
+        "release_id": "6465913ae5994944962871b2"
+   }
+}

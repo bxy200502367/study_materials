@@ -1,0 +1,38 @@
+name: sample qc
+description: |
+  拆分系统sample_qc工作流
+options:
+  - name: split_id
+    desc: 拆分的split_id
+    type: string
+    required: True
+  - name: sample_qc_info
+    desc: 存放样本信息
+    type: string
+    required: True
+  - name: sample_qc_params
+    desc: 质控的参数文件夹
+    type: string
+    required: True
+diagram: |
+  [*]                      --> split_sample_qc_info
+  split_sample_qc_info     --> parallel_qc
+  parallel_qc              --> [*]
+phase_configs:
+  - phase_name: split_sample_qc_info
+    phase_desc: 把to_file的文件拆分成多个文件
+    name: datasplit_v3.sample_qc.datasplit_split_sample_qc_info
+    option:
+      infile: "{sample_qc_info}"
+    log: "Step: pretreatment_sample_qc_info"
+    publish: "sample_qc_info"
+  - phase_name: parallel_qc
+    phase_desc: 并行进行sample_qc
+    name: datasplit_v3.sample_qc.parallel_sample_qc
+    type: module
+    option:
+      sample_qc_info_dir: "{output_dir}/sample_qc_info/"
+      sample_qc_params: "{sample_qc_params}"
+    log: "Step: parallel_sample_qc"
+    publish: "sample_qc_result"
+  

@@ -1,0 +1,20 @@
+{
+    "id": "CF9-20230427Nova_20230605_test1-xu",
+    "type": "workflow",
+    "WPM": true,
+    "wfm_port": "7321",
+    "name": "datasplit_v3.sample_split",
+    "client": "client01",
+    "CLUSTER": "clustre",
+    "IMPORT_REPORT_DATA": true,
+    "to_file": [
+        "datasplit_v3.sample_split.sample_split.export_sample_split_info(sample_split_info)",
+        "datasplit_v3.sample_split.sample_split.export_sample_split_params(meta_params)"
+    ],
+
+    "options": {
+        "split_id": "647def4983d801339229db3a",
+        "sample_split_info": "647def4983d801339229db3a",
+        "meta_params": "647def4983d801339229db3a"
+   }
+}

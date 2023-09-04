@@ -1,0 +1,33 @@
+name: seqkit_split
+description: |
+    seqkit拆分一个fastq
+output: |
+    None
+cpu: 4
+mem: 8G
+queue: chaifen
+global_var:
+    - seqkit
+options:
+    - name: fastq_r1
+      desc: r1端的fastq文件
+      type: string
+      required: True
+    - name: fastq_r2
+      desc: r2端的fastq文件
+      type: string
+      required: True
+    - name: part_num
+      desc: 切割成几份
+      type: int
+      default: 5
+      required: True
+    - name: threads
+      desc: 线程数
+      type: int
+      default: 4
+      required: True
+cmds:
+  - name: run_seqkit_split
+    formatter: >
+        {seqkit} split2 -1 {fastq_r1} -2 {fastq_r2} -p {part_num} -f -j {threads} --out-dir {output_dir}

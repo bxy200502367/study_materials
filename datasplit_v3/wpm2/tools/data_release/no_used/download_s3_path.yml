@@ -1,0 +1,21 @@
+name: download s3 path
+cpu: 1
+mem: 4G
+description: |
+  使用FileTransfer下载s3路径的文件
+output: |
+  None
+env:
+  - LD_LIBRARY_PATH
+global_var:
+  - FileTransfer
+options:
+  - name: fastq_s3_path
+    desc: 要下载的fastq文件的s3路径
+    type: string
+    required: True
+cmds:
+  - name: download_s3_path
+    shell: True
+    formatter: >
+      {FileTransfer} -type download -s3_path {fastq_s3_path} -t {output_dir}

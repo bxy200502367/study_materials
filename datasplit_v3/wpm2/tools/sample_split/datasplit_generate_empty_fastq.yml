@@ -1,0 +1,31 @@
+name: generate empty fastq sample_split
+description: |
+  二拆生成空文件
+output: |
+  None
+cpu: 1
+mem: 4G
+queue: chaifen
+global_var:
+  - python3
+  - generate_empty_fastq_sample_split
+options:
+  - name: sample_primer_json
+    desc: json文件
+    type: string
+    required: True
+  - name: indir
+    desc: 更改的文件夹
+    type: string
+    required: True
+  - name: mode 
+    desc: 模式
+    type: string
+    pickle:
+      - raw
+      - clean
+cmds:
+  - name: run_generate_empty_fastq_sample_split
+    formatter: >
+        {python3} {generate_empty_fastq_sample_split} --sample_primer_json {sample_primer_json} --indir {indir} --mode {mode}
+

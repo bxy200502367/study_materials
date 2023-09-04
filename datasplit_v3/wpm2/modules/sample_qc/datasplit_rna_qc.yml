@@ -1,0 +1,57 @@
+name: sample qc
+description: |
+  拆分系统sample_qc工作流
+options:
+  - name: rna_qc_params
+    desc: 拆分的split_id
+    type: infile
+    format: datasplit_v3.sample_qc.rna_params
+    required: True
+  - name: fastq_paths
+    desc: 存放样本信息
+    type: string
+    required: True
+  - name: sample_id
+    desc: 样本的标识符号,由specimen_id--library_number--specimen_name--majorbio_name组成
+    type: string
+    required: True
+diagram: |
+  [*]                           --> rna_fastp
+  rna_fastp                     --> [*]
+bindings:
+  length_required: $rna_qc_params.length_required
+  cut_mean_quality: $rna_qc_params.cut_mean_quality
+  n_base_limit: $rna_qc_params.n_base_limit
+  qualified_quality_phred: $rna_qc_params.qualified_quality_phred
+  cut_by_quality3: $rna_qc_params.cut_by_quality3
+  cut_by_quality5: $rna_qc_params.cut_by_quality5
+  adapter_sequence: $rna_qc_params.adapter_sequence
+  adapter_sequence_r2: $rna_qc_params.adapter_sequence_r2
+  r1_fastq: $get_r1_fastq
+  r2_fastq: $get_r2_fastq
+  specimen_id: $get_specimen_id
+  library_number: $get_library_number
+  specimen_name: $get_specimen_name
+  majorbio_name: $get_majorbio_name
+phase_configs:
+  - phase_name: rna_fastp
+    phase_desc: 运行rna质控
+    name: datasplit_v3.sample_qc.datasplit_rna_fastp
+    option:
+      fastq_r1: "{r1_fastq}"
+      fastq_r2: "{r2_fastq}"
+      length_required: "{length_required}"
+      cut_mean_quality: "{cut_mean_quality}"
+      n_base_limit: "{n_base_limit}"
+      qualified_quality_phred: "{qualified_quality_phred}"
+      cut_by_quality3: "{cut_by_quality3}"
+      cut_by_quality5: "{cut_by_quality5}"
+      adapter_sequence: "{adapter_sequence}"
+      adapter_sequence_r2: "{adapter_sequence_r2}"
+      specimen_id: "{specimen_id}"
+      library_number: "{library_number}"
+      specimen_name: "{specimen_name}"
+    log: "Step: rna_fastp"
+    publish: ""
+
+  

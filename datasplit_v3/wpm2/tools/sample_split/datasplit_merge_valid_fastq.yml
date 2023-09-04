@@ -1,0 +1,42 @@
+name: merge_split_valid_fastq
+description: |
+  合并并行拆分的valid数据
+output: |
+  {lane_name}--{library_number}.all.raw.valid.1.fq
+  {lane_name}--{library_number}.all.raw.valid.2.fq
+  {lane_name}--{library_number}.all.raw.seq2sam.stat
+cpu: 2
+mem: 10G
+queue: chaifen
+global_var:
+  - cat
+options:
+  - name: dir
+    desc: 存放的文件夹
+    type: string
+    required: True
+  - name: lane_name
+    desc: lane名字
+    type: string
+    required: True
+  - name: library_number
+    desc: 文库名
+    type: string
+    required: True
+cmds:
+  - name: run_merge_split_valid_fastq_r1
+    shell: True
+    formatter: >
+        {cat} {dir}/{lane_name}--{library_number}.part*.raw.valid.1.fq > {work_dir}/{lane_name}--{library_number}.all.raw.valid.1.fq
+  - name: run_merge_split_valid_fastq_r2
+    shell: True
+    formatter: >
+        {cat} {dir}/{lane_name}--{library_number}.part*.raw.valid.2.fq > {work_dir}/{lane_name}--{library_number}.all.raw.valid.2.fq
+  - name: run_merge_seq2sam.stat
+    shell: True
+    formatter: >
+        {cat} {dir}/{lane_name}--{library_number}.part*.raw.seq2sam.stat > {work_dir}/{lane_name}--{library_number}.all.raw.seq2sam.stat
+publish:
+  - pattern: "{lane_name}--{library_number}.all.raw.valid.1.fq"
+  - pattern: "{lane_name}--{library_number}.all.raw.valid.2.fq"
+  - pattern: "{lane_name}--{library_number}.all.raw.seq2sam.stat"

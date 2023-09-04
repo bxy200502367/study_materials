@@ -1,0 +1,51 @@
+name: run cut tail
+description: |
+  fastq序列去掉尾部的n个碱基
+output: |
+  {sample_id}.cut.fastq
+  {sample_id}.fastq.gz
+cpu: 2
+mem: 10G
+queue: chaifen
+global_var:
+  - python3
+  - cut_tail_script
+  - seqtk
+options:
+  - name: cut_adapter_fastq
+    desc: 去除完接头的fastq
+    type: string
+    required: True
+  - name: cut_tail
+    desc: 去掉尾部n个碱基
+    type: int
+    default: 0
+    required: True
+  - name: sample_id
+    desc: 样本名称，用于标识
+    type: string
+    required: True
+  - name: method
+    desc: 处理序列的方法
+    type: string
+    picker:
+      - python
+      - seqtk
+    default: python
+cmds:
+  - name: run_cut_tail_python
+    formatter: >
+      {python3} {cut_tail_script} --fastq {cut_adapter_fastq} --num {cut_tail} --output {work_dir}/{sample_id}.cut_tail.fastq
+    whenif:
+      var: method
+      oprt: "=="
+      value: python
+  - name: run_cut_tail_seqtk
+    formatter: >
+      {seqtk} trimfq -e {cut_tail} {cut_adapter_fastq} > {work_dir}/{sample_id}.cut_tail.fastq
+    whenif:
+      var: method
+      oprt: "=="
+      value: seqtk
+publish:
+  - pattern: "{sample_id}.cut_tail.fastq"

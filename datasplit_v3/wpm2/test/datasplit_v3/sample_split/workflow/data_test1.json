@@ -1,0 +1,20 @@
+{
+    "id": "sample_split-20230601_test2",
+    "type": "workflow",
+    "WPM": true,
+    "wfm_port": "7321",
+    "name": "datasplit_v3.sample_split",
+    "client": "client01",
+    "CLUSTER": "clustre",
+    "IMPORT_REPORT_DATA": true,
+    "to_file": [
+        "datasplit_v3.sample_split.sample_split.export_sample_split_info(sample_split_info)",
+        "datasplit_v3.sample_split.sample_split.export_sample_split_params(meta_params)"
+    ],
+
+    "options": {
+        "split_id": "647444ffa853fd0bcc790eb8",
+        "sample_split_info": "647444ffa853fd0bcc790eb8",
+        "meta_params": "647444ffa853fd0bcc790eb8"
+   }
+}

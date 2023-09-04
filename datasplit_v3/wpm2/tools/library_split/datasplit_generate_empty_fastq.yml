@@ -1,0 +1,24 @@
+name: generate_empty_fastq
+description: |
+  生成空fastq
+output: |
+  None
+cpu: 1
+mem: 4G
+queue: chaifen
+global_var:
+  - python3
+  - generate_empty_fastq
+options:
+  - name: indir
+    desc: 文库拆分结果文件夹
+    type: string
+    required: True
+  - name: library_info
+    desc: 输入的library_info.xls文件
+    type: string
+    required: True
+cmds:
+  - name: run_file_arrange
+    formatter: >
+        {python3} {generate_empty_fastq} --indir {indir} --library_info {library_info}

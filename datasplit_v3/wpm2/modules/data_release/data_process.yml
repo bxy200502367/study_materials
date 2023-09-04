@@ -1,0 +1,124 @@
+name: data process
+description: |
+  单个样本的数据释放module
+options:
+  - name: one_release_specimen_info
+    desc: 一个样本的信息表
+    type: infile
+    format: datasplit_v3.data_release.one_release_specimen_info
+    required: True
+  - name: one_qc_params_dir
+    desc: 质控文件夹
+    type: string
+    required: True
+bindings:
+  r1_paths_str: $one_release_specimen_info.r1_paths_str
+  r2_paths_str: $one_release_specimen_info.r2_paths_str
+  r1_clean_paths_str: $one_release_specimen_info.r1_clean_paths_str
+  r2_clean_paths_str: $one_release_specimen_info.r2_clean_paths_str
+  raw75_paths_str: $one_release_specimen_info.raw75_paths_str
+  exist_s3_clean: $one_release_specimen_info.exist_s3_clean
+  specimen_name: $one_release_specimen_info.specimen_name
+  sample_id: $one_release_specimen_info.sample_id
+  tuple_number: $one_release_specimen_info.tuple_number
+  sampling_st: $one_release_specimen_info.sampling_st
+  merge_st: $one_release_specimen_info.merge_st
+  qc_st: $one_release_specimen_info.qc_st
+  rename_st: $one_release_specimen_info.rename_st
+  rm_primer_st: $one_release_specimen_info.rm_primer_st
+  product_type: $one_release_specimen_info.product_type
+  contract_data_size: $one_release_specimen_info.contract_data_size
+  sample_rename: $one_release_specimen_info.sample_rename
+  barcode_tag: $one_release_specimen_info.barcode_tag
+  f_barcode: $one_release_specimen_info.f_barcode
+  r_barcode: $one_release_specimen_info.r_barcode
+  primer: $one_release_specimen_info.primer
+  link_primer: $one_release_specimen_info.link_primer
+  reverse_primer: $one_release_specimen_info.reverse_primer
+diagram: |
+  [*]                       -->   meta_data_process
+  [*]                       -->   other_data_process
+  [*]                       -->   mirna_data_process
+  mirna_data_process        -->   [*]
+  meta_data_process         -->   [*]
+  other_data_process        -->   [*]
+phase_configs:
+  - phase_name: meta_data_process
+    phase_desc: 多样性样本的数据处理
+    type: module
+    name: datasplit_v3.data_release.data_process_meta
+    option:
+      r1_paths_str: "{r1_paths_str}"
+      r2_paths_str: "{r2_paths_str}"
+      r1_clean_paths_str: "{r1_clean_paths_str}"
+      specimen_name: "{specimen_name}"
+      sample_id: "{sample_id}"
+      tuple_number: "{tuple_number}"
+      rename_st: "{rename_st}"
+      rm_primer_st : "{rm_primer_st}"
+      sample_rename: "{sample_rename}"
+      product_type: "{product_type}"
+      f_barcode: "{f_barcode}"
+      r_barcode: "{r_barcode}"
+      link_primer: "{link_primer}"
+      reverse_primer: "{reverse_primer}"
+    log: "Step 01: meta数据的处理"
+    publish: "{product_type}"
+    whenif:
+      var: product_type
+      oprt: "=="
+      value: "meta"
+  - phase_name: mirna_data_process
+    phase_desc: mirna样本的数据处理
+    type: module
+    name: datasplit_v3.data_release.data_process_mirna
+    option:
+      r1_paths_str: "{r1_paths_str}"
+      r2_paths_str: "{r2_paths_str}"
+      r1_clean_paths_str: "{r1_clean_paths_str}"
+      raw75_paths_str: "{raw75_paths_str}"
+      specimen_name: "{specimen_name}"
+      sample_id: "{sample_id}"
+      tuple_number: "{tuple_number}"
+      merge_st: "{merge_st}"
+      rename_st: "{rename_st}"
+      sample_rename: "{sample_rename}"
+      product_type: "{product_type}"
+    log: "Step 01: mirna数据的处理"
+    publish: "{product_type}"
+    whenif:
+      var: product_type
+      oprt: "=="
+      value: "mirna"
+  - phase_name: other_data_process
+    phase_desc: 数据处理
+    type: module
+    name: datasplit_v3.data_release.data_process_other
+    option:
+      r1_paths_str: "{r1_paths_str}"
+      r2_paths_str: "{r2_paths_str}"
+      r1_clean_paths_str: "{r1_clean_paths_str}"
+      r2_clean_paths_str: "{r2_clean_paths_str}"
+      exist_s3_clean: "{exist_s3_clean}"
+      product_type: "{product_type}"
+      specimen_name: "{specimen_name}"
+      sample_id: "{sample_id}"
+      tuple_number: "{tuple_number}"
+      merge_st: "{merge_st}"
+      rename_st: "{rename_st}"
+      sample_rename: "{sample_rename}"
+      qc_st: "{qc_st}"
+      qc_params: "{one_qc_params_dir}/{product_type}.json"
+    log: "Step 01: 数据处理"
+    publish: "{product_type}"
+    whenif:
+      var: product_type
+      oprt: "in"
+      value:
+        - meta_genomic
+        - rna
+        - lncrna
+        - microbial_genome
+        - dna
+        - self-library
+        - prokaryotic_rna

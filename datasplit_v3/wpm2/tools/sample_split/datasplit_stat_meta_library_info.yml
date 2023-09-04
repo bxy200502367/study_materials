@@ -1,0 +1,40 @@
+name: stat meta library info
+description: |
+  统计多样性拆分信息
+output: |
+  {lane_name}--{library_number}.lib_stat.xls
+cpu: 1
+mem: 4G
+queue: chaifen
+global_var:
+  - python3
+  - stat_meta_library_info
+options:
+  - name: lane_name
+    desc: lane名
+    type: string
+    required: True
+  - name: library_number
+    desc: 文库名
+    type: string
+    required: True
+  - name: valid_stat_file
+    type: string
+    required: True
+  - name: flash_log_file
+    type: string
+    required: True
+  - name: fastp_json
+    type: string
+    required: True
+  - name: split_fastq
+    type: string
+    required: True
+cmds:
+  - name: run_stat_meta_library_info
+    formatter: >
+        {python3} {stat_meta_library_info} --library_number {library_number} --valid_stat_file {valid_stat_file} 
+        --flash_log_file {flash_log_file} --fastp_json {fastp_json} --split_fastq {split_fastq} 
+        --qc_stat {work_dir}/{lane_name}--{library_number}.lib_stat.xls
+publish:
+  - pattern: "{lane_name}--{library_number}.lib_stat.xls"

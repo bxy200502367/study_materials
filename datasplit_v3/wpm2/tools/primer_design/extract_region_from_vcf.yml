@@ -1,0 +1,48 @@
+name: extract region from vcf
+cpu: 4
+mem: 32G
+description: |
+  使用bcftools提取region中的位点
+output: |
+  {sample_id}.region.vcf.gz
+env:
+  - LD_LIBRARY_PATH
+global_var:
+  - bcftools
+  - rm
+  - ln
+  - bgzip
+  - tabix
+options:
+  - name: region_file
+    desc: 富集区域结果文件
+    type: string
+    required: True
+  - name: vcf_file
+    desc: vcf文件
+    type: string
+    required: True
+  - name: sample_id
+    desc: 样本名
+    type: string
+    required: True
+cmds:
+  - name: bgzip_tabix
+    shell: True
+    formatter: >
+      {rm} -f {vcf_file} && {ln} {vcf_file} {sample_id}.vcf.gz
+      <--##-->
+      {software_dir}/{tabix} -f {sample_id}.vcf.gz
+    whenif:
+      var: vcf_file
+      oprt: endswith
+      value: ".gz"
+    whenelse: >
+      {software_dir}/{bgzip} -@ 4 -c {vcf_file} > {sample_id}.vcf.gz
+      <--##-->
+      {software_dir}/{tabix} -f {sample_id}.vcf.gz
+  - name: extract_region_from_vcf
+    formatter: >
+      {bcftools} view -R {region_file} {sample_id}.vcf.gz -o {sample_id}.region.vcf.gz
+publish:
+  - pattern: "*.region.vcf.gz"

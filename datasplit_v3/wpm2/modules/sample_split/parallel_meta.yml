@@ -1,0 +1,86 @@
+name: parallel meta
+type: module
+description: |
+    基于多样性文库信息进行多文库并行拆分
+options:
+    - name: indir
+      desc: 非官方多样性信息
+      type: infile
+      format: datasplit_v3.sample_split.sample_info_dir
+      required: True
+    - name: meta_params
+      desc: 多样性参数文件
+      type: infile
+      format: datasplit_v3.sample_split.meta_params
+      required: True
+diagram: |
+    [*]                             --> parallel_meta_official
+    [*]                             --> parallel_meta_no_official
+    parallel_meta_official          --> [*]
+    parallel_meta_no_official       --> [*]
+bindings:
+    has_meta_official: $indir.has_meta_official
+    has_meta_no_official: $indir.has_meta_no_official
+    length_required: $meta_params.length_required
+    cut_by_quality5: $meta_params.cut_by_quality5
+    cut_by_quality3: $meta_params.cut_by_quality3
+    cut_right_window_size: $meta_params.cut_right_window_size
+    cut_right_mean_quality: $meta_params.cut_right_mean_quality
+    min_length: $meta_params.min_length
+    max_length: $meta_params.max_length
+    mismatch_rate: $meta_params.mismatch_rate
+    valid_length: $meta_params.valid_length
+    min_len: $meta_params.min_len
+    mismatch: $meta_params.mismatch
+    split_type: $meta_params.split_type
+phase_configs:
+    - phase_name: parallel_meta_official
+      phase_desc: 官方多样性并行拆分
+      name: datasplit_v3.sample_split.datasplit_meta_official
+      type: module
+      option:
+          meta_official_info: "{scatter_value}"
+          length_required: "{length_required}"
+          cut_by_quality5: "{cut_by_quality5}"
+          cut_by_quality3: "{cut_by_quality3}"
+          cut_right_window_size: "{cut_right_window_size}"
+          cut_right_mean_quality: "{cut_right_mean_quality}"
+          min_length: "{min_length}"
+          max_length: "{max_length}"
+          mismatch_rate: "{mismatch_rate}"
+          valid_length: "{valid_length}"
+          min_len: "{min_len}"
+          mismatch: "{mismatch}"
+          split_type: "{split_type}"
+      scatter: $indir.meta_official_dict
+      log: "开始运行官方多样性文库 {scatter_key} 的拆分"
+      whenif:
+          var: has_meta_official
+          oprt: "=="
+          value: "yes"
+      publish: "{scatter_key}"
+    - phase_name: parallel_meta_no_official
+      phase_desc: 非官方多样性并行拆分
+      name: datasplit_v3.sample_split.datasplit_meta_no_official
+      type: module
+      option:
+          meta_no_official_info: "{scatter_value}"
+          length_required: "{length_required}"
+          cut_by_quality5: "{cut_by_quality5}"
+          cut_by_quality3: "{cut_by_quality3}"
+          cut_right_window_size: "{cut_right_window_size}"
+          cut_right_mean_quality: "{cut_right_mean_quality}"
+          min_length: "{min_length}"
+          max_length: "{max_length}"
+          mismatch_rate: "{mismatch_rate}"
+          valid_length: "{valid_length}"
+          min_len: "{min_len}"
+          mismatch: "{mismatch}"
+          split_type: "{split_type}"
+      scatter: $indir.meta_no_official_dict
+      log: "开始运行非官方多样性文库 {scatter_key} 的拆分"
+      whenif:
+          var: has_meta_no_official
+          oprt: "=="
+          value: "yes"
+      publish: "{scatter_key}"

@@ -1,0 +1,20 @@
+name: split sample qc info
+description: |
+  拆分质控的信息文件，一种product_type一个文件
+output: |
+  None
+cpu: 1
+mem: 4G
+queue: chaifen
+global_var:
+  - python3
+  - split_sample_qc_info
+options:
+  - name: sample_qc_info_file
+    desc: 质控的to_file文件
+    type: string
+    required: True
+cmds:
+  - name: run_split_sample_qc_info
+    formatter: >
+        {python3} {split_sample_qc_info} --infile {sample_qc_info_file} --outdir {output_dir}

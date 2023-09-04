@@ -1,0 +1,22 @@
+{
+    "id": "vcf_preprocess-20230628_test2",
+    "type": "module",
+    "WPM": true,
+    "wfm_port": "7321",
+    "name": "dna_evolution_v2.vcf_preprocess.vcf_preprocess",
+    "client": "client01",
+    "CLUSTER": "lustre",
+    "IMPORT_REPORT_DATA": true,
+    "options": {
+        "raw": "/mnt/lustre/users/sanger-dev/sg-users/yuan.xu/majorbio_task/售后/顾钱洪_vcf处理/顾钱洪MJ20171103009美吉处理-数据vcf/美吉处理-数据vcf/new.vcf",
+        "maf": 0.05,
+        "depth": 2,
+        "group": "/mnt/lustre/users/sanger-dev/sg-users/yuan.xu/majorbio_task/售后/顾钱洪_vcf处理/顾钱洪MJ20171103009美吉处理-数据vcf/美吉处理-数据vcf/group_list.txt",
+        "f_miss": 0.3,
+        "minGQ": 0,
+        "min_avg_depth": 0,
+        "hwe": 0,
+        "window_size": 100,
+        "rsquare": 0.1
+   }
+}

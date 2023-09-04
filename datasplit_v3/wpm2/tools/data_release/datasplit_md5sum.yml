@@ -1,0 +1,38 @@
+name: md5sum
+description: |
+  计算文件夹下文件的md5sum值
+output: |
+  {prefix}.txt
+cpu: 8
+mem: 16G
+queue: chaifen
+global_var:
+  - ls
+  - cat
+  - xargs
+  - md5sum
+options:
+  - name: dir
+    desc: 文件夹
+    type: infile
+    format: datasplit_v3.sample_split.md5sum_dir
+    required: True
+  - name: prefix
+    desc: 前缀
+    type: string
+    required: True
+bindings:
+    is_empty: $dir.is_empty
+cmds:
+  - name: run_md5sum
+    shell: True
+    formatter: >
+      {ls} {dir}/*.gz > {work_dir}/file_list.txt
+      <--##-->
+      {xargs} -a {work_dir}/file_list.txt -P 8 -i {md5sum} {{}} >  {work_dir}/{prefix}.txt
+    whenif:
+      var: is_empty
+      oprt: "=="
+      value: "no"
+publish:
+  - pattern: "{prefix}.txt"

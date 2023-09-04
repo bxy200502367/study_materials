@@ -1,0 +1,32 @@
+name: rfam stat
+description: |
+  对blastn后的xml文件进行统计
+output: |
+  {sample_name}.rfam_summary.xls
+cpu: 2
+mem: 10G
+queue: chaifen
+global_var:
+  - python
+  - rfam_stat_script
+  - rfam_seed
+  - touch
+options:
+  - name: xml_file
+    desc: 比对完的xml文件
+    type: string
+    required: True
+  - name: sample_name
+    desc: sample名字
+    type: string
+    required: True
+cmds:
+  - name: run_rfam_stat
+    shell: True
+    formatter: >
+      {python} {rfam_stat_script} -i {xml_file} -db {rfam_seed} -o {sample_name}.rfam_summary.xls
+    whenif: $judge_xml_size
+    whenelse: >
+      {touch} {sample_name}.rfam_summary.xls
+publish:
+  - pattern: "{sample_name}.rfam_summary.xls"

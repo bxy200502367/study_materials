@@ -1,0 +1,29 @@
+name: bcl to fastq
+description: |
+    使用bcl_convert把bcl原始测试文件转化成fastq
+cpu: 8
+mem: 128G
+squeue: chaifen
+global_var:
+    - bcl_convert
+    - mkdir
+options:
+    - name: bcl_path
+      desc: bcl原始测序路径
+      type: string
+      required: True
+    - name: sample_sheet
+      desc: 每个文库的拆分信息
+      type: string
+      required: True
+cmds:
+    - name: make_dir
+      shell: True
+      formatter: >
+          {mkdir} {work_dir}/bcl_result
+    - name: run_bcl_convert
+      formatter: >
+          {bcl_convert} --bcl-input-directory {bcl_path} --output-directory {work_dir}/bcl_result 
+          --sample-sheet {sample_sheet} --force --bcl-num-conversion-thread 8 --bcl-num-compression-threads 8  
+          --bcl-num-decompression-threads 8  --bcl-num-parallel-tiles 8  --fastq-gzip-compression-level 4 
+          --strict-mode true

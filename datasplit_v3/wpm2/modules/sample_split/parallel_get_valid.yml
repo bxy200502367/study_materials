@@ -1,0 +1,77 @@
+name: parallel get valid
+type: module
+description: |
+  基于多样性文库信息进行多文库并行拆分
+options:
+  - name: fastq_r1
+    desc: R1端的fastq
+    type: string
+    required: True
+  - name: fastq_r2
+    desc: R2端的fastq
+    type: string
+    required: True
+  - name: barcode_config
+    desc: barcode配置
+    type: string
+    required: True
+  - name: lane_name
+    desc: lane名
+    type: string
+    required: True
+  - name: library_number
+    desc: 文库名字
+    type: string
+    required: True
+  - name: part_nums
+    desc: 分成的份数
+    type: int
+    required: True
+diagram: |
+  [*]                             -->  seqkit_split
+  seqkit_split                    -->  parallel_get_valid
+  parallel_get_valid              -->  merge_fastq
+  parallel_get_valid              -->  merge_valid_stat
+  merge_fastq                     -->  [*]
+  merge_valid_stat                -->  [*]
+phase_configs:
+  - phase_name: seqkit_split
+    phase_desc: seqkit拆分数据成N份
+    name: datasplit_v3.sample_split.datasplit_seqkit_split
+    option:
+      fastq_r1: "{fastq_r1}"
+      fastq_r2: "{fastq_r2}"
+      part_num: "{part_nums}"
+    log: 开始拆分文库fastq
+    publish: ""
+  - phase_name: parallel_get_valid
+    phase_desc: 将fastq拆成多份
+    name: datasplit_v3.sample_split.datasplit_get_valid_by_barcode
+    option:
+      fastq_r1: "{output_dir}/{lane_name}--{library_number}.R1.{scatter_value}.fastq.gz"
+      fastq_r2: "{output_dir}/{lane_name}--{library_number}.R2.{scatter_value}.fastq.gz"
+      barcode_config: "{barcode_config}"
+      lane_name: "{lane_name}"
+      library_number: "{library_number}"
+      key_id: "{scatter_value}"
+    scatter: $make_part_nums
+    log: "开始运行 {scatter_key} 的get_valid"
+    publish: ""
+  - phase_name: merge_fastq
+    phase_desc: 合并并行get_valid后合并数据
+    name: datasplit_v3.sample_split.datasplit_merge_valid_fastq
+    option:
+      dir: "{output_dir}"
+      lane_name: "{lane_name}"
+      library_number: "{library_number}"
+    log: 开始合并fastq文件
+    publish: ""
+  - phase_name: merge_valid_stat 
+    phase_desc: 合并valid统计文件
+    name: datasplit_v3.sample_split.datasplit_merge_valid_stat
+    option:
+      dir: "{output_dir}"
+      lane_name: "{lane_name}"
+      library_number: "{library_number}"
+    log: 开始合并valid统计信息
+    publish: ""

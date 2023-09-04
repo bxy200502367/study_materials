@@ -1,0 +1,15 @@
+{
+    "id": "datasplit_cut_left-20230702_test1",
+    "type": "tool",
+    "WPM": true,
+    "wfm_port": "7321",
+    "name": "datasplit_v3.sample_qc.datasplit_cut_left",
+    "testmod": true,
+    "client": "client01",
+    "CLUSTER": "clustre",
+    "IMPORT_REPORT_DATA": true,
+    "options": {
+      "fastq": "/mnt/dlustre/users/sanger/wpm2/workspace/20230627/LibrarySplit_CF5-20230621NovaX_20230627_160040/output/library_result/6/H0621novaX6_L1EHF1201639/L1EHF1201639--FH_2_2.R1.raw.fastq.gz",
+      "sample_id": "L1EHF1201639--FH_2_2"
+    }
+}

@@ -1,0 +1,1 @@
+{"flash": {"m": "10", "M": "100", "x": "0.2"}, "split_by_barcode": {"mismatch": "2"}, "trim_fqseq": {"m": "", "l": ""}, "split_type": "Auto", "trimmomatic": {"leading": "0", "slidingwindow": "50:20", "trailing": "20", "minlen": "50"}}

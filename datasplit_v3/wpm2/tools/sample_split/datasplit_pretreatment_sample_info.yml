@@ -1,0 +1,20 @@
+name: pretreatment_sample_info
+description: |
+  处理二拆的信息文件
+output: |
+  None
+cpu: 1
+mem: 4G
+queue: chaifen
+global_var:
+  - python3
+  - pretreatment_sample_info
+options:
+  - name: infile
+    desc: 二拆的结果文件
+    type: string
+    required: True
+cmds:
+  - name: run_pretreatment_sample_info
+    formatter: >
+        {python3} {pretreatment_sample_info} --infile {infile} --outdir {output_dir}

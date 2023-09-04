@@ -1,0 +1,88 @@
+name: meta rename
+cpu: 1
+mem: 4G
+description: |
+  多样性样本改名,序列改名
+output: |
+  {sample_rename}.R1.raw.fastq.gz
+  {sample_rename}.R2.raw.fastq.gz
+  {sample_rename}.clean.fastq.gz
+  {specimen_name}.R1.raw.fastq.gz
+  {specimen_name}.R2.raw.fastq.gz
+  {specimen_name}.clean.fastq.gz
+env:
+  - LD_LIBRARY_PATH
+global_var:
+  - ln
+  - python3
+  - meta_sequence_rename
+  - gzip
+options:
+  - name: r1_raw_fastq
+    desc: r1端raw数据
+    type: string
+    required: True
+  - name: r2_raw_fastq
+    desc: r2端raw数据
+    type: string
+    required: True
+  - name: clean_fastq
+    desc: clean数据
+    type: string
+    required: True
+  - name: specimen_name
+    desc: 样本名,改成的名字
+    type: string
+    required: True
+  - name: sample_rename
+    desc: 样本名,要改成的名字，rename为True的时候存在
+    type: string
+    required: True
+  - name: rename_st
+    desc: 是否要重命名
+    type: string
+    required: True
+cmds:
+  - name: rename_r1_raw
+    shell: True
+    formatter: >
+      {software_dir}/{python3} {meta_sequence_rename} --fastq_file {r1_raw_fastq} --sample_name {sample_rename} --outfile {work_dir}/{sample_rename}.R1.raw.fastq
+      <--##-->
+      {gzip} -f -k {work_dir}/{sample_rename}.R1.raw.fastq
+    whenif:
+      var: rename_st
+      oprt: "=="
+      value: "True"
+    whenelse: >
+      {ln} -f {r1_raw_fastq} {work_dir}/{specimen_name}.R1.raw.fastq.gz
+  - name: rename_r2_raw
+    shell: True
+    formatter: >
+      {software_dir}/{python3} {meta_sequence_rename} --fastq_file {r2_raw_fastq} --sample_name {sample_rename} --outfile {work_dir}/{sample_rename}.R2.raw.fastq
+      <--##-->
+      {gzip} -f -k {work_dir}/{sample_rename}.R2.raw.fastq
+    whenif:
+      var: rename_st
+      oprt: "=="
+      value: "True"
+    whenelse: >
+      {ln} -f {r2_raw_fastq} {work_dir}/{specimen_name}.R2.raw.fastq.gz
+  - name: rename_clean
+    shell: True
+    formatter: >
+      {software_dir}/{python3} {meta_sequence_rename} --fastq_file {clean_fastq} --sample_name {sample_rename} --outfile {work_dir}/{sample_rename}.clean.fastq
+      <--##-->
+      {gzip} -f -k {work_dir}/{sample_rename}.clean.fastq
+    whenif: 
+      var: rename_st
+      oprt: "=="
+      value: "True"
+    whenelse: >
+      {ln} -f {clean_fastq} {work_dir}/{specimen_name}.clean.fastq.gz
+publish:
+  - pattern: "{sample_rename}.R1.raw.fastq.gz"
+  - pattern: "{sample_rename}.R2.raw.fastq.gz"
+  - pattern: "{sample_rename}.clean.fastq.gz"
+  - pattern: "{specimen_name}.R1.raw.fastq.gz"
+  - pattern: "{specimen_name}.R2.raw.fastq.gz"
+  - pattern: "{specimen_name}.clean.fastq.gz"

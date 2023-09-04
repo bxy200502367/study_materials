@@ -1,0 +1,35 @@
+name: parallel sample qc
+type: module
+description: |
+  基于质控信息进行产品的并行质控
+options:
+  - name: sample_qc_info_dir
+    desc: 质控信息表文件夹
+    type: infile
+    format: datasplit_v3.sample_qc.sample_qc_info_dir
+    required: True
+  - name: sample_qc_params
+    desc: 质控参数文件夹
+    type: string
+    required: True
+diagram: |
+  [*]                             --> rna_qc
+  rna_qc                          --> [*]
+bindings:
+  has_rna: $sample_qc_info_file.has_rna
+phase_configs:
+  - phase_name: rna_qc
+    phase_desc: 单个rna样本质控
+    name: datasplit_v3.sample_qc.datasplit_rna_qc
+    type: module
+    option:
+      rna_qc_params: "{sample_qc_params}/rna.json"
+      fastq_paths: "{scatter_value}"
+      sample_id: "{scatter_key}"
+    scatter: $indir.rna_sample_dict
+    log: "开始运行rna样品 {scatter_key} 的质控"
+    whenif:
+      var: has_rna
+      oprt: "=="
+      value: "yes"
+    publish: "{scatter_key}"

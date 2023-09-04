@@ -1,0 +1,100 @@
+name: specimen rename
+cpu: 1
+mem: 4G
+description: |
+  样本改名
+output: |
+  {specimen_rename}.R1.raw.fastq.gz
+  {specimen_rename}.R2.raw.fastq.gz
+  {specimen_rename}.R1.clean.fastq.gz
+  {specimen_rename}.R2.clean.fastq.gz
+env:
+  - LD_LIBRARY_PATH
+global_var:
+  - ln
+options:
+  - name: r1_raw_fastq
+    desc: r1端raw数据
+    type: string
+    required: True
+  - name: r2_raw_fastq
+    desc: r2端raw数据
+    type: string
+    required: True
+  - name: r1_clean_fastq
+    desc: r1端的clean数据
+    type: string
+    required: True
+  - name: r2_clean_fastq
+    desc: r2端的clean数据
+    type: string
+    required: True
+  - name: r1_raw_suffix
+    desc: r1端raw的输出后缀
+    type: string
+    required: True
+  - name: r2_raw_suffix
+    desc: r2端raw的输出后缀
+    type: string
+    required: True
+  - name: r1_clean_suffix
+    desc: r1端clean的输出后缀
+    type: string
+    required: True
+  - name: r2_clean_suffix
+    desc: r2端clean的输出后缀
+    type: string
+    required: True
+  - name: rename_st
+    desc: 是否要重命名
+    type: string
+    required: True
+  - name: specimen_name
+    desc: 样本名
+    type: string
+    required: True
+  - name: specimen_rename
+    desc: 要改成的样本名字
+    type: string
+    required: True
+cmds:
+  - name: rename_r1_raw
+    shell: True
+    formatter: >
+      {ln} -f {r1_raw_fastq} {output_dir}/{specimen_rename}.{r1_raw_suffix}
+    whenif:
+      var: rename_st
+      oprt: "=="
+      value: "True"
+    whenelse: >
+      {ln} -f {r1_raw_fastq} {output_dir}/{specimen_name}.{r1_raw_suffix}
+  - name: rename_r2_raw
+    shell: True
+    formatter: >
+      {ln} -f  {r2_raw_fastq} {output_dir}/{specimen_rename}.{r2_raw_suffix}
+    whenif:
+      var: rename_st
+      oprt: "=="
+      value: "True"
+    whenelse: >
+      {ln} -f {r2_raw_fastq} {output_dir}/{specimen_name}.{r2_raw_suffix}
+  - name: rename_r1_clean_1
+    shell: True
+    formatter: >
+      {ln} -f {r1_clean_fastq} {output_dir}/{specimen_rename}.{r1_clean_suffix}
+    whenif: $exist_r1_clean_rename
+  - name: rename_r2_clean_1
+    shell: True
+    formatter: >
+      {ln} -f {r2_clean_fastq} {output_dir}/{specimen_rename}.{r2_clean_suffix}
+    whenif: $exist_r2_clean_rename
+  - name: rename_r1_clean_2
+    shell: True
+    formatter: >
+      {ln} -f {r1_clean_fastq} {output_dir}/{specimen_name}.{r1_clean_suffix}
+    whenif: $exist_r1_clean_no_rename
+  - name: rename_r2_clean_2
+    shell: True
+    formatter: >
+      {ln} -f {r2_clean_fastq} {output_dir}/{specimen_name}.{r2_clean_suffix}
+    whenif: $exist_r2_clean_no_rename

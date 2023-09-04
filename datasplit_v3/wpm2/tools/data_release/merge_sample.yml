@@ -1,0 +1,48 @@
+name: merge sample
+cpu: 1
+mem: 4G
+description: |
+  使用cat合并文件
+output: |
+  {sample_name}.R1.merge.raw.fastq.gz
+  {sample_name}.R2.merge.raw.fastq.gz
+  {sample_name}.R1.raw.fastq.gz
+  {sample_name}.R2.raw.fastq.gz
+env:
+  - LD_LIBRARY_PATH
+global_var:
+  - cat
+options:
+  - name: one_merge_info
+    desc: 分析单中每一个样本合并
+    type: infile
+    format: datasplit_v3.one_merge_info
+    required: True
+bindings:
+  tuple_number: $one_merge_info.tuple_number
+  r1_paths_str: $one_merge_info.r1_paths_str
+  r2_paths_str: $one_merge_info.r2_paths_str
+  sample_name: $one_merge_info.sample_name
+cmds:
+  - name: cat_r1_fastq
+    shell: true
+    formatter: >
+      {cat} {r1_paths_str} > {sample_name}.R1.merge.raw.fastq.gz
+    whenif:
+      var: tuple_number
+      oprt: ">"
+      value: 1
+    whenelse: >
+      {cat} {r1_paths_str} > {sample_name}.R1.raw.fastq.gz
+  - name: cat_r2_fastq
+    shell: true
+    formatter: >
+      {cat} {r2_paths_str} > {sample_name}.R2.merge.raw.fastq.gz
+    whenif:
+      var: tuple_number
+      oprt: ">"
+      value: 1
+    whenelse: >
+      {cat} {r2_paths_str} > {sample_name}.R2.raw.fastq.gz
+publish:
+  - pattern: "*.raw.fastq.gz"

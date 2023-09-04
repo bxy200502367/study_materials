@@ -1,0 +1,73 @@
+name: flash
+description: |
+  Flash拼接
+output: |
+  {lane_name}--{library_number}.trim.hist
+  {lane_name}--{library_number}.trim.extendedFrags.fastq
+  run_flash.o
+cpu: 6
+mem: 10G
+queue: chaifen
+global_var:
+  - flash
+options:
+  - name: fastq_r1
+    desc: R1的fastq文件
+    type: string
+    required: True
+  - name: fastq_r2
+    desc: R2的fastq文件
+    type: string
+    required: True
+  - name: min_length
+    desc: -m,两个reads之间所需的最小重叠长度,以提供可靠的重叠
+    type: string
+    required: True
+  - name: max_length
+    desc: -M,两个reads之间的最大重叠长度
+    type: string
+    required: True
+  - name: mismatch_rate
+    desc: -x,错配和重叠长度允许的最大比率
+    type: string
+    required: True
+  - name: pred
+    desc: -p,FASTQ文件中的碱基的质量值,Pred33/Pred64
+    type: string
+    picker:
+      - "33"
+      - "64"
+    default: "33"
+  - name: thread
+    desc: -t,线程数
+    type: string
+    required: True
+    default: "6"
+  - name: lane_name
+    desc: lane名
+    type: string
+    required: True
+  - name: library_number
+    desc: 文库名
+    type: string
+    required: True
+  - name: its_primer
+    desc: 是否是ITS引物
+    type: string
+    required: True
+cmds:
+  - name: run_flash
+    formatter: >
+        {flash} -m {min_length} -M {max_length} -x {mismatch_rate} -p {pred} -t {thread}
+        -d {work_dir} -o {lane_name}--{library_number}.trim {fastq_r1} {fastq_r2}
+    whenif:
+        var: its_primer
+        oprt: "!="
+        value: "yes"
+    whenelse: >
+        {flash} -m {min_length} -M 300 -x {mismatch_rate} -p {pred} -t {thread}
+        -d {work_dir} -o {lane_name}--{library_number}.trim {fastq_r1} {fastq_r2}
+publish:
+  - pattern: "{lane_name}--{library_number}.trim.hist"
+  - pattern: "{lane_name}--{library_number}.trim.extendedFrags.fastq"
+  - pattern: "run_flash.o"

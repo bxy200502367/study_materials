@@ -1,0 +1,53 @@
+name: data merge
+description: |
+  数据下载并合并module
+options:
+  - name: paths_str
+    desc: paths的字符串
+    type: string
+    required: True
+  - name: tuple_number
+    desc: 有多少样本要合并
+    type: string
+    required: True
+  - name: sample_id
+    desc: 样本标识
+    type: string
+    required: True
+  - name: suffix
+    desc: 结果文件的后缀
+    type: string
+    required: True
+diagram: |
+  [*]                  -->   download_paths
+  download_paths       -->   merge_fq
+  merge_fq             -->   [*]
+phase_configs:
+  - phase_name: download_paths
+    phase_desc: 下载fastq的数据
+    name: datasplit_v3.data_release.data_download
+    scatter: $get_fq_dict
+    option:
+      fastq_path: "{scatter_value}"
+      outdir_name: "{scatter_key}"
+      s3_or_not: "no"
+    log: "开始下载 {scatter_key} 的r1_fastq"
+    publish: "download_fastq"
+  - phase_name: merge_fq
+    phase_desc: 合并fastq的数据
+    name: datasplit_v3.data_release.data_merge
+    option:
+      fastq_dir: "{output_dir}/download_fastq"
+      tuple_number: "{tuple_number}"
+      sample_id: "{sample_id}"
+      suffix: "{suffix}"
+    log: "开始合并fastq"
+    publish: "merge_fastq"
+  - phase_name: md5sum
+    phase_desc: 计算r2的md5sum值
+    name: datasplit_v3.data_release.datasplit_md5sum
+    option:
+      dir: "{output_dir}/merge_fastq"
+      prefix: "md5sum"
+    log: "开始计算r2的md5sum值"
+    publish: "merge_fastq"

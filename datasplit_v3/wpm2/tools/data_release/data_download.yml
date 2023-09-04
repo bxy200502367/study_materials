@@ -1,0 +1,44 @@
+name: data download
+cpu: 1
+mem: 4G
+description: |
+  使用FileTransfer下载s3路径的文件或者cp本地路径
+output: |
+  None
+env:
+  - LD_LIBRARY_PATH
+global_var:
+  - mkdir
+  - ln
+  - cp
+options:
+  - name: fastq_path
+    desc: 要下载的fastq文件的s3路径或者本地路径
+    type: infile
+    format: datasplit_v3.fastq
+    required: True
+  - name: outdir_name
+    desc: 要存放的文件夹
+    type: string
+    required: True
+  - name: s3_or_not
+    desc: 是否是s3路径
+    type: string
+    required: True
+cmds:
+  - name: mkdir_data
+    shell: True
+    formatter: >
+      {mkdir} -p {outdir_name}
+  - name: download_s3_path
+    shell: True
+    formatter: >
+      {ln} {fastq_path} {outdir_name}
+    whenif:
+      var: s3_or_not
+      oprt: "=="
+      value: "yes"
+    whenelse: >
+      {cp} {fastq_path} {outdir_name}
+publish:
+  - pattern: "{outdir_name}"

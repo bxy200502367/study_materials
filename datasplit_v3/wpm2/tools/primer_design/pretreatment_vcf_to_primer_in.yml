@@ -1,0 +1,43 @@
+name: pretreatment vcf to primer in
+cpu: 4
+mem: 32G
+description: |
+  预处理vcf为primer3软件可识别的输入文件
+output: |
+  {sample_id}.region.vcf.gz
+env:
+  - LD_LIBRARY_PATH
+global_var:
+  - perl
+  - primer3_in
+options:
+  - name: region_vcf
+    desc: 要进行引物设计的vcf文件
+    type: string
+    required: True
+  - name: ref_fa
+    desc: 参考基因组文件
+    type: string
+    required: True
+  - name: tm1
+    desc: Tm1温度
+    type: float
+    default: 57.0
+    required: True
+  - name: tm2
+    desc: Tm2温度
+    type: float
+    default: 63.0
+    required: True
+  - name: product_size
+    desc: 产物大小
+    type: string
+    default: 200-300
+    required: True
+  - name:
+cmds:
+  - name: extract_region_from_vcf
+    formatter: >
+      {bcftools} view -R {region_file} {vcf} -o {sample_id}.region.vcf.gz
+publish:
+  - pattern: "*.region.vcf.gz"

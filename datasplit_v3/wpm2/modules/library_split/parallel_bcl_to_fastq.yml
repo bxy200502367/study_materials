@@ -1,0 +1,25 @@
+name: parallel bcl to fastq
+type: module
+description: |
+  基于lane并行运行bcl_to_fastq拆分
+options:
+  - name: library_info_dir
+    desc: 一拆信息存放文件
+    type: infile
+    format: datasplit_v3.library_split.library_info_dir
+    required: True
+diagram: |
+  [*] --> parallel_bcl_to_fastq
+  parallel_bcl_to_fastq --> [*]
+phase_configs:
+  - phase_name: parallel_bcl_to_fastq
+    phase_desc: 基于lane运行bcl_to_fastq拆分
+    name: datasplit_v3.library_split.datasplit_bcl_to_fastq
+    type: module
+    option:
+      library_info_file: "{scatter_value}.library_info.xls"
+      library_split_json: "{scatter_value}.library_split.json"
+      rename_file: "{scatter_value}.rename.xls"
+    scatter: $library_info_dir.lane_dict
+    log: "开始运行lane {scatter_key} 的bcl_to_fastq"
+    publish: ""

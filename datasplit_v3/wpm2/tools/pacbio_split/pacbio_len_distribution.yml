@@ -1,0 +1,23 @@
+name: pacbio len distribution
+description: |
+  长度分布文件生成
+cpu: 1
+mem: 4G
+output: |
+  len_distribution.xls
+env:
+  - LD_LIBRARY_PATH
+global_var:
+  - python3
+  - len_distribution
+options:
+  - name: len_file
+    desc: 长度统计文件
+    type: string
+    required: True
+cmds:
+  - name: run_pacbio_stat_len
+    formatter: >
+      {python3} {len_distribution} --infile {len_file} --outfile {work_dir}/len_distribution.xls
+publish:
+  pattern: "len_distribution.xls"

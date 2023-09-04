@@ -1,0 +1,136 @@
+name: data process mirna
+description: |
+  单个样本mirna的数据释放module
+options:
+  - name: r1_paths_str
+    desc: raw的r1字符串
+    type: string
+    required: True
+  - name: r2_paths_str
+    desc: raw的r2字符串
+    type: string
+    required: True
+  - name: r1_clean_paths_str
+    desc: clean的r1字符串
+    type: string
+    required: True
+  - name: raw75_paths_str
+    desc: raw75的字符串
+    type: string
+    required: True
+  - name: specimen_name
+    desc: 样本名
+    type: string
+    required: True
+  - name: sample_id
+    desc: 样本标识
+    type: string
+    required: True
+  - name: tuple_number
+    desc: 要合并的样本数量
+    type: string
+    required: True
+  - name: merge_st
+    desc: 是否要合并
+    type: string
+    required: True
+  - name: rename_st
+    desc: 是否要改名
+    type: string
+    required: True
+  - name: sample_rename
+    desc: 要改成的样本名
+    type: string
+    required: True
+  - name: product_type
+    desc: 拆分类型
+    type: string
+    required: True
+diagram: |
+  [*]                        -->   mirna_r1_raw_merge
+  [*]                        -->   mirna_r2_raw_merge
+  [*]                        -->   mirna_clean_merge
+  [*]                        -->   mirna_raw75_merge
+  mirna_raw75_merge          -->   mirna_rename
+  mirna_r1_raw_merge         -->   mirna_rename
+  mirna_r2_raw_merge         -->   mirna_rename
+  mirna_clean_merge          -->   mirna_rename
+  mirna_rename              -->    md5sum
+  md5sum                     -->   [*]
+phase_configs:
+  - phase_name: mirna_r1_raw_merge
+    phase_desc: mirna_r1_raw数据s3路径下载和合并
+    type: module
+    name: datasplit_v3.data_release.data_merge
+    option:
+      paths_str: "{r1_paths_str}"
+      tuple_number: "{tuple_number}"
+      sample_id: "{sample_id}"
+      suffix: "R1.raw.fastq.gz"
+    log: "Step 01: mirna_r1_raw数据下载并合并"
+    publish: "01.mirna_r1_raw_merge_data"
+    whenif: $judge_run_merge_rename
+  - phase_name: mirna_r2_raw_merge
+    phase_desc: mirna_r2_raw数据s3路径下载和合并
+    type: module
+    name: datasplit_v3.data_release.data_merge
+    option:
+      paths_str: "{r2_paths_str}"
+      tuple_number: "{tuple_number}"
+      sample_id: "{sample_id}"
+      suffix: "R2.raw.fastq.gz"
+    log: "Step 01: mirna_r2_raw数据下载并合并"
+    publish: "01.mirna_r2_raw_merge_data"
+    whenif: $judge_run_merge_rename
+  - phase_name: mirna_clean_merge
+    phase_desc: mirna_clean数据s3路径下载和合并(mirna)
+    type: module
+    name: datasplit_v3.data_release.data_merge
+    option:
+      paths_str: "{r1_clean_paths_str}"
+      tuple_number: "{tuple_number}"
+      sample_id: "{sample_id}"
+      suffix: "fasta.gz"
+    log: "Step 01: mirna的clean数据下载并合并"
+    publish: "01.mirna_clean_merge_data"
+    whenif: $judge_run_merge_rename
+  - phase_name: mirna_raw75_merge
+    phase_desc: mirna_raw75数据s3路径下载和合并(mirna)
+    type: module
+    name: datasplit_v3.data_release.data_merge
+    option:
+      paths_str: "{raw75_paths_str}"
+      tuple_number: "{tuple_number}"
+      sample_id: "{sample_id}"
+      suffix: "fastq.gz"
+    log: "Step 01: mirna_raw75数据下载并合并"
+    publish: "01.mirna_raw75_merge_data"
+    whenif: $judge_run_merge_rename
+  - phase_name: mirna_rename
+    phase_desc: mirna样本重命名
+    name: datasplit_v3.data_release.specimen_rename
+    option:
+      r1_raw_fastq: "{output_dir}/01.mirna_r1_raw_merge_data/merge_fastq/{sample_id}.R1.raw.fastq.gz"
+      r2_raw_fastq: "{output_dir}/01.mirna_r2_raw_merge_data/merge_fastq/{sample_id}.R2.raw.fastq.gz"
+      r1_clean_fastq: "{output_dir}/01.mirna_clean_merge_data/merge_fastq/{sample_id}.fasta.gz"
+      r2_clean_fastq: "{output_dir}/01.mirna_raw75_merge_data/merge_fastq/{sample_id}.fastq.gz"
+      r1_raw_suffix: "R1.raw.fastq.gz"
+      r2_raw_suffix: "R2.raw.fastq.gz"
+      r1_clean_suffix: "fasta.gz"
+      r2_clean_suffix: "fastq.gz"
+      rename_st: "{rename_st}"
+      specimen_name: "{specimen_name}"
+      specimen_rename: "{sample_rename}"
+    log: "Step 02: mirna样本重命名"
+    publish: "{product_type}"
+    whenif: $judge_run_merge_rename
+  - phase_name: md5sum
+    phase_desc: rename后文件的md5sum值
+    name: datasplit_v3.data_release.datasplit_md5sum
+    option:
+      dir: "{output_dir}/mirna"
+      prefix: "md5sum"
+    log: "开始计算md5sum值"
+    publish: "{product_type}"
+    whenif: $judge_run_merge_rename
+    

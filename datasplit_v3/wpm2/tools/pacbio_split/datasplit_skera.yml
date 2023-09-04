@@ -1,0 +1,25 @@
+name: skera
+description: |
+  对mas-seq测序的数据进行文库拆分
+output: |
+  mas.bam
+cpu: 8
+mem: 32G
+queue: chaifen
+global_var:
+  - skera
+options:
+  - name: adapter
+    desc: 连接序列的fasta文件
+    type: string
+    required: True
+  - name: bam
+    desc: 要拆分的bam文件
+    type: string
+    required: True
+cmds:
+  - name: run_skera
+    formatter: > 
+      {skera} split {bam} {adapter} {workdir}/mas.bam --num-threads 8 
+publish:
+  - pattern: "mas.bam"

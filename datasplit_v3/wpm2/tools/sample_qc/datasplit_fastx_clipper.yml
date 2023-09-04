@@ -1,0 +1,45 @@
+name: run fastx clipper
+description: |
+  fastx_clipper 用于对SE序列做去接头的工具
+output: |
+  {sample_id}.clip_s.fastq
+  {sample_id}_Sample_QC_stat.xls
+cpu: 2
+mem: 10G
+queue: chaifen
+global_var:
+  - fastx_clipper
+  - python3
+  - stat_fastx_clipper
+options:
+  - name: cut_fastq
+    desc: 截取完的fastq
+    type: string
+    default: True
+  - name: length
+    desc: 最小序列长度，丢弃比此值更短的序列
+    type: int
+    default: 18
+  - name: adapter
+    desc: 接头序列，如果微量建库，则改为AAAAAA
+    type: string
+    default: AGATCGGAAGAGCACACGTC
+  - name: quality
+    desc: quality值
+    type: int
+    default: 35
+  - name: sample_id
+    desc: 样本名称，用于标识
+    type: string
+    required: True
+cmds:
+  - name: run_fastx_clipper
+    formatter: >
+      {fastx_clipper} -i {cut_fastq} -a {adapter} -Q {quality} -v -l {length} -o {work_dir}/{sample_id}.clip_s.fastq
+  - name: run_clip_stat
+    desc: 统计fastx_clipper出来的结果.o文件里的信息
+    formatter: >
+      {python3} {stat_fastx_clipper} --sample_id {sample_id} --infile {work_dir}/run_fastx_clipper.o --outfile {work_dir}/{sample_id}_Sample_QC_stat.xls
+publish:
+  - pattern: "{sample_id}.clip_s.fastq"
+  - pattern: "{sample_id}_Sample_QC_stat.xls"

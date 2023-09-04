@@ -1,0 +1,43 @@
+name: trim_length_after
+description: |
+  拼接后长度过滤
+output: |
+  {lane_name}--{library_number}.fq
+cpu: 1
+mem: 4G
+queue: chaifen
+global_var:
+  - perl
+  - trim_length
+options:
+  - name: fastq
+    desc: fastq文件
+    type: string
+    required: True
+  - name: start_pos
+    type: string
+    required: True
+    default: "1"
+  - name: min_len
+    type: string
+    required: True
+    default: "50"
+  - name: trim_end_len
+    type: string
+    required: True
+    default: "0"
+  - name: lane_name
+    desc: lane名字
+    type: string
+    required: True
+  - name: library_number
+    type: string
+    required: True
+cmds:
+  - name: trim_length_after
+    shell: True
+    formatter: >
+        {perl} {trim_length} -i {fastq} -o {work_dir}/{lane_name}--{library_number}.fq -s {start_pos} -m {min_len}
+        -e {trim_end_len}
+publish:
+  - pattern: "{lane_name}--{library_number}.fq"

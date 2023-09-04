@@ -1,0 +1,20 @@
+{
+    "id": "CF15-20230530PE300-P2-N2_20230605_test3-xu",
+    "type": "workflow",
+    "WPM": true,
+    "wfm_port": "7321",
+    "name": "datasplit_v3.sample_split",
+    "client": "client01",
+    "CLUSTER": "clustre",
+    "IMPORT_REPORT_DATA": true,
+    "to_file": [
+        "datasplit_v3.sample_split.sample_split.export_sample_split_info(sample_split_info)",
+        "datasplit_v3.sample_split.sample_split.export_sample_split_params(meta_params)"
+    ],
+
+    "options": {
+        "split_id": "647c21b46c1c650069684a6b",
+        "sample_split_info": "647c21b46c1c650069684a6b",
+        "meta_params": "647c21b46c1c650069684a6b"
+   }
+}

@@ -1,0 +1,25 @@
+{
+    "id": "CF1-230718PE30_20230808_test3-xu",
+    "type": "workflow",
+    "WPM": true,
+    "wfm_port": "7321",
+    "name": "datasplit_v3.library_split",
+    "client": "client01",
+    "CLUSTER": "clustre",
+    "IMPORT_REPORT_DATA": true,
+    "testmod": true,
+    "output": "s3nb2://datasplit/test/library_split/20230808/CF1-230718PE30",
+    "to_file": [
+        "datasplit_v3.library_split.library_split.export_library_info_dir(library_info_dir)",
+        "datasplit_v3.library_split.library_split.export_specimen_info(all_sample_info)",
+        "datasplit_v3.library_split.library_split.export_self_library_info(self_library_info)"
+    ],
+    "options": {
+        "all_sample_info": "64d1cdd5776f85662065bb23",
+        "library_info_dir": "64d1cdd5776f85662065bb23",
+        "self_library_info": "64d1cdd5776f85662065bb23",
+        "split_id": "64d1cdd5776f85662065bb23",
+        "update_info": "{\"64d1cdd5776f85662065bb23\": \"sg_split\"}"
+
+   }
+}

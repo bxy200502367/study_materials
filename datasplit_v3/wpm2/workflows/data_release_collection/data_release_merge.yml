@@ -1,0 +1,36 @@
+name: data release merge
+description: |
+  数据释放合并过程
+options:
+  - name: merge_info_file
+    desc: 数据合并的信息表
+    type: string
+    required: True
+  - name: sample_name
+    desc: 单个样本的信息
+    type: string
+    required: true
+diagram: |
+  [*]                  --> VcfPreprocess
+  VcfPreprocess        --> ClassicStat
+  VcfPreprocess        --> Ld
+  VcfPreprocess        --> PopStructure
+  VcfPreprocess        --> SelectiveSweep
+  Ld                   --> GwasPipeline
+  GwasPipeline         --> FileArrange
+  SelectiveSweep       --> FileArrange
+  PopStructure         --> FileArrange
+  ClassicStat          --> FileArrange
+  FileArrange          --> GenerateReport
+  GenerateReport       --> [*]
+  FileArrange          --> GenerateReportGWAS
+  GenerateReportGWAS   --> [*]
+phase_configs:
+  - phase_name: download_data
+    phase_desc: 下载s3上的数据
+    name: datasplit_v3.data_release.parallel_data_process
+    type: module
+    option:
+      data_release_info: "{data_release_info}"
+    log: "Step: parallel_data_process"
+    publish: "temp_out"

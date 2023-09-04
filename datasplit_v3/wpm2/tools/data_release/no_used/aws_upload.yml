@@ -1,0 +1,28 @@
+name: aws upload
+cpu: 1
+mem: 4G
+description: |
+  使用aws上传本地文件到亚马逊上
+output: |
+  None
+env:
+  - LD_LIBRARY_PATH
+global_var:
+  - aws
+options:
+  - name: fastq_file
+    desc: 要上传的fastq文件的本地路径
+    type: string
+    required: True
+  - name: aws_path
+    desc: 上传的亚马逊的路径
+    type: string
+    default: s3://majorbio-public/
+  - name: storage_class
+    desc: 亚马逊对象的存储类型
+    type: string
+    default: INTELLIGENT_TIERING
+cmds:
+  - name: aws_upload
+    formatter: >
+      {aws} s3 cp {fastq_file} {aws_path} --storage-class {storage_class}

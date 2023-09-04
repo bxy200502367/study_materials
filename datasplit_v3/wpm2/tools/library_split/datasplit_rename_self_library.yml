@@ -1,0 +1,24 @@
+name: rename self library
+description: |
+  重命名纯文库文件
+output: |
+  None
+cpu: 1
+mem: 4G
+queue: chaifen
+global_var:
+  - python3
+  - rename_self_library
+options:
+  - name: self_library_info
+    desc: 纯文库信息表
+    type: string
+    required: True
+  - name: indir
+    desc: 一拆结果文件夹
+    type: string
+    required: True
+cmds:
+  - name: run_rename_self_library
+    formatter: >
+        {python3} {rename_self_library} --self_library_info {self_library_info} --indir {indir}

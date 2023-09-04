@@ -1,0 +1,56 @@
+name: bcl_to_fastq
+cpu: 8
+mem: 32G
+queue: chaifen
+description: |
+  将bcl转化成fastq
+output: |
+  {lane_match}/Fastq/*
+  {lane_match}/Reports/*
+  {lane_match}/Stats/*
+global_var:
+  - bcl2fastq
+env:
+  - LD_LIBRARY_PATH
+options:
+  - name: data_path
+    desc: bcl原始测序路径
+    type: string
+    required: True
+  - name: lane_match
+    desc: 要拆分的lane
+    type: string
+    default: True
+  - name: sample_sheet
+    desc: 每个文库的拆分信息
+    type: string
+    required: True
+  - name: bases_mask
+    desc: 测序模式
+    type: string
+    required: True
+  - name: barcode_mismatch
+    desc: barcode错配率
+    type: string
+    required: True
+  - name: ignore_error
+    desc: 是否忽略warning信息
+    type: string
+    required: True
+cmds:
+  - name: run_bcl2fastq
+    formatter: >
+        {bcl2fastq} -i {data_path}/Data/Intensities/BaseCalls/  -o {work_dir}/bcl_result --sample-sheet {sample_sheet}
+        --use-bases-mask {bases_mask} --ignore-missing-bcl -R {data_path} -r 8 -w 8 -p 8 --barcode-mismatches {barcode_mismatch}
+    callback: $check_bcl2fastq_log
+  - name: run_md5sum
+    callback: $run_md5sum
+mkoutdir:
+  - '{lane_match}/'
+publish:
+  - pattern: bcl_result/Fastq/*
+    dir: '{lane_match}/Fastq'
+  - pattern: bcl_result/Reports/html/*/all/all/all/*
+    dir: '{lane_match}/Reports'
+  - pattern: bcl_result/Stats/*
+    dir: '{lane_match}/Stats'

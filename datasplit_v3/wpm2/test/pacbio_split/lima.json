@@ -1,0 +1,15 @@
+{
+    "id": "lima_20230829-xy",
+    "type": "module",
+    "WPM": true,
+    "wfm_port": "7321",
+    "name": "datasplit_v3.pacbio_split.datasplit_pacbio_split_v3",
+    "client": "client01",
+    "CLUSTER": "clustre",
+    "options": {
+        "ccs_bam": "/mnt/clustre/users/sanger-dev/sg-users/yuan.xu/majorbio_task/pacbio_split/20230828_mas_seq/mas.bam",
+        "hifi_preset_mode": "ASYMMETRIC",
+        "sample_sheet": "/mnt/clustre/users/sanger-dev/sg-users/yuan.xu/majorbio_task/pacbio_split/20230828_mas_seq/pacbio_sample_sheet2.txt",
+        "source_data": "hifi"
+    }
+}

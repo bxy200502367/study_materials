@@ -1,0 +1,25 @@
+name: sample_split_file_arrange
+description: |
+  整理二拆结果文件
+output: |
+  {lane_name}--{library_number}.*.fastq.gz
+cpu: 1
+mem: 4G
+queue: chaifen
+global_var:
+  - python3
+  - sample_split_file_arrange
+options:
+  - name: indir
+    desc: 输入文件夹
+    type: string
+    required: True
+  - name: outdir
+    desc: 输出文件夹
+    type: string
+    required: True
+cmds:
+  - name: run_sample_split_file_arrange
+    formatter: >
+      {python3} {sample_split_file_arrange} --indir {indir} --outdir {outdir}
+    log: 开始整理二拆结果

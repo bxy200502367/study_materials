@@ -1,0 +1,24 @@
+name: rename library
+description: |
+  重命名一拆的结果
+output: |
+  None
+cpu: 1
+mem: 4G
+queue: chaifen
+global_var:
+  - python3
+  - rename_library
+options:
+  - name: rename_file
+    desc: 要更名的rename_file
+    type: string
+    required: True
+  - name: result_dir
+    desc: 要改名的文件夹
+    type: string
+    required: True
+cmds:
+  - name: run_rename_file
+    formatter: >
+        {python3} {rename_library} --result_dir {result_dir} --rename_file {rename_file}

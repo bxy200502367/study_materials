@@ -1,0 +1,74 @@
+name: run cut left
+description: |
+  fastq序列去掉前n个碱基，保留左边前nbp
+output: |
+  {sample_id}.cut.fastq
+  {sample_id}.fastq.gz
+cpu: 2
+mem: 10G
+queue: chaifen
+global_var:
+  - gunzip
+  - cp
+  - gzip
+  - python3
+  - cut_left_script
+  - seqtk
+options:
+  - name: fastq
+    desc: 样本fastq文件
+    type: string
+    required: True
+  - name: cut_left
+    desc: 去掉前多少bp碱基
+    type: int
+    default: 3
+    required: True
+  - name: length_contain
+    desc: 最小序列长度，丢弃比此值更短的序列
+    type: int
+    default: 75
+    required: True
+  - name: sample_id
+    desc: 样本名称，用于标识
+    type: string
+    required: True
+  - name: method
+    desc: 处理序列的方法
+    type: string
+    picker:
+      - python
+      - seqtk
+    default: python
+cmds:
+  - name: gunzip_fastq
+    shell: True
+    formatter: >
+      {gunzip} -c {fastq} > {work_dir}/{sample_id}.fastq
+    whenif:
+      var: fastq
+      oprt: endswith
+      value: .gz
+    whenelse: >
+      {cp} {fastq} {work_dir}/{sample_id}.fastq
+  - name: run_cut_left_python
+    formatter: >
+      {python3} {cut_left_script} -i {work_dir}/{sample_id}.fastq -n {cut_left} -c {length_contain} -o {work_dir}/{sample_id}.cut.fastq
+    whenif:
+      var: method
+      oprt: "=="
+      value: python
+  - name: run_cut_left_seqtk
+    formatter: >
+      {seqtk} trimfq -L {length_contain} -b {cut_left} {work_dir}/{sample_id}.fastq > {work_dir}/{sample_id}.cut.fastq
+    whenif:
+      var: method
+      oprt: "=="
+      value: seqtk
+  - name: gunzip_fastq_after
+    shell: True
+    formatter: >
+      {gzip} -c {work_dir}/{sample_id}.cut.fastq > {work_dir}/{sample_id}.fastq.gz
+publish:
+  - pattern: "{sample_id}.cut.fastq"
+  - pattern: "{sample_id}.fastq.gz"

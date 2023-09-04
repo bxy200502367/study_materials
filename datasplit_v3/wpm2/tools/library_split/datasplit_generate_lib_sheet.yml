@@ -1,0 +1,26 @@
+name: generate library sheet
+description: |
+  生成一拆的library_sheet
+output: |
+  {lane_match}.library_sheet.csv
+cpu: 1
+mem: 4G
+queue: chaifen
+global_var:
+  - python3
+  - generate_lib_sheet
+options:
+  - name: lane_match
+    desc: lane的匹配信息
+    type: string
+    required: True
+  - name: library_info_file
+    desc: to_file生成的library_info文件
+    type: string
+    required: True
+cmds:
+  - name: run_generate_lib_sheet
+    formatter: >
+        {python3} {generate_lib_sheet} --infile {library_info_file} --outfile {work_dir}/{lane_match}.library_sheet.csv
+publish:
+  - pattern: "{lane_match}.library_sheet.csv"

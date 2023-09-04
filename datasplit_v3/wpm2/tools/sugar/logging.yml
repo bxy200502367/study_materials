@@ -1,0 +1,33 @@
+version: 1
+formatters:
+  simple:
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: ERROR
+    formatter: simple
+  file:
+    class: logging.FileHandler
+    filename: /mnt/clustre/users/sanger-dev/wpm2/workspace/log/error.log
+    level: ERROR
+    formatter: simple
+  time_rotate:
+    class: logging.handlers.TimedRotatingFileHandler
+    filename: /mnt/clustre/users/sanger-dev/wpm2/workspace/log/datasplit.log
+    level: INFO
+    formatter: simple
+    when: W1
+    backupCount: 50
+    encoding: utf-8
+loggers:
+  StreamLogger:
+    level: DEBUG
+    handlers: [console]
+  DatasplitLogger:
+    level: DEBUG
+    handlers: [file, time_rotate]
+root:
+  level: DEBUG
+  handlers: [console]

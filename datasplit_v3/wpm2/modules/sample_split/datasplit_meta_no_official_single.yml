@@ -1,0 +1,236 @@
+name: meta no official single
+description: |
+    二代非官方多样性单端拆分module
+options:
+  - name: barcode_config
+    desc: barcode配置文件
+    type: string
+    required: True
+  - name: primer_config
+    desc: primer配置文件
+    type: string
+    required: True
+  - name: sample_primer_json
+    desc: 样本引物信息配对文件
+    type: string
+    required: True
+  - name: length_required
+    desc: 长度过滤参数,fastp用
+    type: string
+    required: True
+  - name: cut_by_quality5
+    desc: fastp用
+    type: string
+    required: True
+  - name: cut_by_quality3
+    desc: fastp用
+    type: string
+    required: True
+  - name: cut_right_mean_quality
+    desc: fastp用
+    type: string
+    required: True
+  - name: cut_right_window_size
+    desc: fastp用
+    type: string
+    required: True
+  - name: min_length
+    desc: -m,两个reads之间所需的最小重叠长度,以提供可靠的重叠;flash使用
+    type: string
+    required: True
+  - name: max_length
+    desc: -M,两个reads之间的最大重叠长度
+    type: string
+    required: True
+  - name: mismatch_rate
+    desc: flash运行错配率
+    type: string
+    required: True
+  - name: valid_length
+    desc: trim_fqseq专用,最长值
+    type: string
+    required: True
+  - name: min_len
+    desc: trim_fqseq专用,最短值
+    type: string
+    required: True
+  - name: mismatch
+    desc: 允许引物错配数
+    type: string
+    required: True
+  - name: lane_name
+    desc: lane名字
+    type: string
+    required: True
+  - name: library_number
+    desc: 文库名字
+    type: string
+    required: True
+  - name: fastq_r1_path
+    desc: r1端fastq文件
+    type: infile
+    format: datasplit_v3.sample_split.fastq
+    required: True
+  - name: fastq_r2_path
+    desc: r2端fastq文件
+    type: infile
+    format: datasplit_v3.sample_split.fastq
+    required: True
+  - name: trim_max_length
+    desc: 根据插入片段大小获取的max_length
+    type: string
+    required: True
+  - name: trim_min_length
+    desc: 根据插入片段大小获取的min_length
+    type: string
+    required: True
+  - name: its_primer
+    desc: 是否是its引物
+    type: string
+    required: True
+diagram: |
+    [*]                             -->   rename_fastq
+    rename_fastq                    -->   get_valid
+    rename_fastq                    -->   parallel_get_valid
+    get_valid                       -->   meta_fastp
+    parallel_get_valid              -->   meta_fastp
+    meta_fastp                      -->   split_by_one_barcode
+    split_by_one_barcode            -->   trim_length
+    split_by_one_barcode            -->   trim_length_self
+    trim_length                     -->   extra_clean
+    trim_length_self                -->   extra_clean
+    extra_clean                     -->   stat_library
+    get_valid                       -->   extra_raw
+    parallel_get_valid              -->   extra_raw
+    extra_raw                       -->   stat_library
+    stat_library                    -->   [*]
+bindings:
+  fastq_size: $fastq_r1_path.filesize
+phase_configs:
+  - phase_name: rename_fastq
+    phase_desc: 重命名文库
+    name: datasplit_v3.sample_split.datasplit_rename_library
+    option:
+      fastq_r1: "{fastq_r1_path}"
+      fastq_r2: "{fastq_r2_path}"
+      lane_name: "{lane_name}"
+      library_number: "{library_number}"
+    log: 将文库的文件改名
+    publish: 00.rename
+  - phase_name: get_valid
+    phase_desc: 获得valid信息
+    name: datasplit_v3.sample_split.datasplit_get_valid_by_barcode
+    option:
+      fastq_r1: "{output_dir}/00.rename/{lane_name}--{library_number}.R1.fastq.gz"
+      fastq_r2: "{output_dir}/00.rename/{lane_name}--{library_number}.R2.fastq.gz"
+      barcode_config: "{barcode_config}"
+      lane_name: "{lane_name}"
+      library_number: "{library_number}"
+    log: 从文库中获得valid文件
+    publish: 02.valid_fastq
+    whenif:
+      var: fastq_size
+      oprt: "<="
+      value: 10000000
+  - phase_name: parallel_get_valid
+    phase_desc: 在文库过大时,进行并行拆分
+    name: datasplit_v3.sample_split.parallel_get_valid
+    type: module
+    option:
+      fastq_r1: "{output_dir}/00.rename/{lane_name}--{library_number}.R1.fastq.gz"
+      fastq_r2: "{output_dir}/00.rename/{lane_name}--{library_number}.R2.fastq.gz"
+      barcode_config: "{barcode_config}"
+      lane_name: "{lane_name}"
+      library_number: "{library_number}"
+      part_nums: 9
+    log: 从文库中并行获得valid文件
+    publish: 02.valid_fastq
+    whenif:
+      var: fastq_size
+      oprt: ">"
+      value: 10000000
+  - phase_name: meta_fastp
+    phase_desc: fastp进行质控
+    name: datasplit_v3.sample_split.datasplit_meta_fastp
+    option:
+      fastq_r1: "{output_dir}/02.valid_fastq/{lane_name}--{library_number}.all.raw.valid.1.fq"
+      fastq_r2: "{output_dir}/02.valid_fastq/{lane_name}--{library_number}.all.raw.valid.2.fq"
+      length_required: "{length_required}"
+      cut_by_quality5: "{cut_by_quality5}"
+      cut_by_quality3: "{cut_by_quality3}"
+      cut_right_mean_quality: "{cut_right_mean_quality}"
+      cut_right_window_size: "{cut_right_window_size}"
+      lane_name: "{lane_name}"
+      library_number: "{library_number}"
+    log: fastp进行质控
+    publish: 03.fastp_fastq
+  - phase_name: split_by_one_barcode
+    phase_desc: 单端拆样本
+    name: datasplit_v3.sample_split.datasplit_split_by_barcode
+    option:
+      fastq: '{output_dir}/03.fastp_fastq/{lane_name}--{library_number}.fastp.1.fq'
+      primer_config: '{primer_config}'
+      mismatch: '{mismatch}'
+      lane_name: '{lane_name}'
+      library_number: '{library_number}'
+      split_type: Single
+    log: 开始单端拆样本
+    publish: 06.split_fastq
+  - phase_name: trim_length
+    phase_desc: 长度过滤,有min_len参数输入
+    name: datasplit_v3.sample_split.datasplit_trim_length_after
+    option:
+      fastq: '{output_dir}/06.split_fastq/{lane_name}--{library_number}.trim.merge.split.fq'
+      min_len: '{min_len}'
+      lane_name: '{lane_name}'
+      library_number: '{library_number}'
+    log: 拆樣本后長度过滤
+    publish: 07.trim_length_fastq
+    whenif:
+      var: min_len
+      oprt: "!="
+      value: ""
+  - phase_name: trim_length_self
+    phase_desc: 长度过滤,无min_len参数输入
+    name: datasplit_v3.sample_split.datasplit_trim_length_after
+    option:
+      fastq: '{output_dir}/06.split_fastq/{lane_name}--{library_number}.trim.merge.split.fq'
+      min_len: '{trim_min_length}'
+      lane_name: '{lane_name}'
+      library_number: '{library_number}'
+    log: 拆樣本后長度过滤
+    publish: 07.trim_length_fastq
+    whenif:
+      var: min_len
+      oprt: "=="
+      value: ""
+  - phase_name: extra_clean
+    phase_desc: 拆样本，统计样本的数据量
+    name: datasplit_v3.sample_split.datasplit_extract_meta_clean
+    option:
+      in_fastq: '{output_dir}/07.trim_length_fastq/{lane_name}--{library_number}.fq'
+      sample_primer_json: '{sample_primer_json}'
+    log: 提取质控后的fastq
+    publish: 09.clean_data
+  - phase_name: extra_raw
+    phase_desc: 从valid文件提取raw_data
+    name: datasplit_v3.sample_split.datasplit_extract_raw_from_valid
+    option:
+      valid_fastq_r1: '{output_dir}/02.valid_fastq/{lane_name}--{library_number}.all.raw.valid.1.fq'
+      valid_fastq_r2: '{output_dir}/02.valid_fastq/{lane_name}--{library_number}.all.raw.valid.2.fq'
+      seq2sam: '{output_dir}/02.valid_fastq/{lane_name}--{library_number}.all.raw.seq2sam.stat'
+      sample_primer_json: '{sample_primer_json}'
+    log: 获得raw_data
+    publish: 08.raw_data
+  - phase_name: stat_library
+    phase_desc: 统计library的结果
+    name: datasplit_v3.sample_split.datasplit_stat_meta_library_info
+    option:
+      lane_name: "{lane_name}"
+      library_number: "{library_number}"
+      valid_stat_file: "{output_dir}/02.valid_fastq/{lane_name}--{library_number}.all.raw.valid.stat"
+      flash_log_file: "{output_dir}/05.flash_fastq/run_flash.o"
+      fastp_json: "{output_dir}/03.fastp_fastq/{lane_name}--{library_number}.json"
+      split_fastq: "{output_dir}/06.split_fastq/{lane_name}--{library_number}.trim.merge.split.fq"
+    log: 统计文库的拆分信息
+    publish: 10.stat_info

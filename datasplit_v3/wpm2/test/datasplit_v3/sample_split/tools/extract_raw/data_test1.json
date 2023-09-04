@@ -1,0 +1,16 @@
+{
+    "id": "datasplit_extract_raw_from_valid-20230530_test4",
+    "type": "tool",
+    "WPM": true,
+    "wfm_port": "7321",
+    "name": "datasplit_v3.sample_split.datasplit_extract_raw_from_valid",
+    "client": "client01",
+    "CLUSTER": "clustre",
+    "IMPORT_REPORT_DATA": true,
+    "options": {
+        "vaild_fastq_r1": "/mnt/clustre/users/sanger-dev/wpm2/workspace/20230519/SampleSplit_CF1-20230516PE300-M12_20230519_095718/MetaQc/SingleMetaQc18/GetvaildBybarcode/output/MJ230512_39.all.raw.valid.1.fq",
+        "vaild_fastq_r2": "/mnt/clustre/users/sanger-dev/wpm2/workspace/20230519/SampleSplit_CF1-20230516PE300-M12_20230519_095718/MetaQc/SingleMetaQc18/GetvaildBybarcode/output/MJ230512_39.all.raw.valid.2.fq",
+        "seq2sam": "/mnt/clustre/users/sanger-dev/wpm2/workspace/20230519/SampleSplit_CF1-20230516PE300-M12_20230519_095718/MetaQc/SingleMetaQc18/GetvaildBybarcode/MJ230512_39.all.raw.seq2sam.stat",
+        "sample_primer_json": "/mnt/clustre/users/sanger-dev/wpm2/workspace/20230519/SampleSplit_CF1-20230516PE300-M12_20230519_095718/MetaQc/MJ20230210016--MJ230512_39.1.all.sample_primer.json"
+    }
+}

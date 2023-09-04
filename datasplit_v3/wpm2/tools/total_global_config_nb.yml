@@ -1,0 +1,7 @@
+var:
+  python2: bioinfo/dna/env/bin/python2
+  python3: bioinfo/dna/env/bin/python3
+  split_data_release_info: "{package_dir}/datasplit_v3/data_release/split_data_release_info.py"
+env:
+  LD_LIBRARY_PATH: '{software_dir}/bioinfo/dna/env/lib'
+  BCFTOOLS_PLUGINS: '{software_dir}/bioinfo/dna/bcftools-1.16/plugins'

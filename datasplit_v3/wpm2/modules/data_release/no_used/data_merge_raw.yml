@@ -1,0 +1,98 @@
+name: data merge raw
+description: |
+  raw数据合并module
+options:
+  - name: r1_paths_str
+    desc: r1_paths的字符串
+    type: string
+    required: True
+  - name: r2_paths_str
+    desc: r2_paths的字符串
+    type: string
+    required: True
+  - name: tuple_number
+    desc: 有多少样本要合并
+    type: string
+    required: True
+  - name: sample_id
+    desc: 样本标识
+    type: string
+    required: True
+diagram: |
+  [*]                  -->   download_r1_paths
+  [*]                  -->   download_r2_paths
+  download_r1_paths    -->   merge_r1_fq
+  download_r2_paths    -->   merge_r2_fq
+  merge_r1_fq          -->   md5sum_r1
+  merge_r2_fq          -->   md5sum_r2
+  md5sum_r1            -->   [*]
+  md5sum_r2            -->   [*]
+phase_configs:
+  - phase_name: download_r1_paths
+    phase_desc: 下载r1的数据
+    name: datasplit_v3.data_release.data_download
+    scatter: $get_r1_fq_dict
+    option:
+      fastq_path: "{scatter_value}"
+      outdir_name: "{scatter_key}"
+      s3_or_not: "no"
+    log: "开始下载 {scatter_key} 的r1_fastq"
+    publish: "r1_path"
+  - phase_name: download_r2_paths
+    phase_desc: 下载r2的数据
+    name: datasplit_v3.data_release.data_download
+    scatter: $get_r2_fq_dict
+    option:
+      fastq_path: "{scatter_value}"
+      outdir_name: "{scatter_key}"
+      s3_or_not: "no"
+    whenif:
+      var: r2_paths_str
+      oprt: "!="
+      value: empty
+    log: "开始下载 {scatter_key} 的r2_fastq"
+    publish: "r2_path"
+  - phase_name: merge_r1_fq
+    phase_desc: 合并r1的数据
+    name: datasplit_v3.data_release.data_merge
+    option:
+      fastq_dir: "{output_dir}/r1_path"
+      tuple_number: "{tuple_number}"
+      sample_id: "{sample_id}"
+      suffix: "R1.fastq.gz"
+    log: "开始合并r1_fastq"
+    publish: "merge_r1_fq"
+  - phase_name: merge_r2_fq
+    phase_desc: 合并r2的数据
+    name: datasplit_v3.data_release.data_merge
+    option: 
+      fastq_dir: "{output_dir}/r2_path"
+      tuple_number: "{tuple_number}"
+      sample_id: "{sample_id}"
+      suffix: "R2.fastq.gz"
+    log: "开始合并r2_fastq"
+    publish: "merge_r2_fq"
+    whenif:
+      var: r2_paths_str
+      oprt: "!="
+      value: empty
+  - phase_name: md5sum_r1
+    phase_desc: 计算r1的md5sum值
+    name: datasplit_v3.data_release.datasplit_md5sum
+    option:
+      dir: "{output_dir}/merge_r1_fq"
+      prefix: "md5sum"
+    log: "开始计算r1的md5sum值"
+    publish: "merge_r1_fq"
+  - phase_name: md5sum_r2
+    phase_desc: 计算r2的md5sum值
+    name: datasplit_v3.data_release.datasplit_md5sum
+    option:
+      dir: "{output_dir}/merge_r2_fq"
+      prefix: "md5sum"
+    log: "开始计算r2的md5sum值"
+    publish: "merge_r2_fq"
+    whenif:
+      var: r2_paths_str
+      oprt: "!="
+      value: empty

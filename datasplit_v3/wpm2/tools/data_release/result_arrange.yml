@@ -1,0 +1,21 @@
+name: sample rename
+cpu: 1
+mem: 4G
+description: |
+  结果文件整理
+output: |
+  None
+env:
+  - LD_LIBRARY_PATH
+global_var:
+  - python3
+  - arrange_result
+options:
+  - name: result_dir
+    desc: 结果文件夹
+    type: string
+    required: True
+cmds:
+  - name: run_arrange_result
+    formatter: >
+      {python3} {arrange_result} --result_dir {result_dir} --arrange_dir {output_dir}

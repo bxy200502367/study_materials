@@ -1,0 +1,25 @@
+name: run fastq to fasta
+description: |
+  将fastq格式文件转换成fasta格式文件
+output: |
+  {sample_id}.fasta.gz
+cpu: 2
+mem: 10G
+queue: chaifen
+global_var:
+  - seqkit
+options:
+  - name: fastq
+    desc: fastq文件
+    type: string
+    required: True
+  - name: sample_id
+    desc: 样本名称，用于标识
+    type: string
+    required: True
+cmds:
+  - name: run_fastq_to_fasta
+    formatter: >
+      {seqkit} fq2fa {fastq} -o {work_dir}/{sample_id}.fasta.gz
+publish:
+  - pattern: "{sample_id}.fasta.gz"

@@ -1,0 +1,19 @@
+{
+    "id": "datasplit_get_valid_by_barcode-20230528_test1",
+    "type": "tool",
+    "WPM": true,
+    "wfm_port": "7321",
+    "add_time": "2022/06/28 17:22:26",
+    "start_time": "",
+    "stage_id": "0",
+    "name": "datasplit_v3.sample_split.datasplit_get_valid_by_barcode",
+    "client": "client01",
+    "CLUSTER": "clustre",
+    "IMPORT_REPORT_DATA": true,
+    "options": {
+        "fastq_r1": "/mnt/dlustre/users/sanger/wpm2/workspace/20230526/LibrarySplit_CF1-20230523PE300-M12_20230526_090339/output/library_result/1/230523PE300-M12_MJ230517P_75/MJ230517P_75_S11_L001_R1_001.fastq.gz",
+        "fastq_r2": "/mnt/dlustre/users/sanger/wpm2/workspace/20230526/LibrarySplit_CF1-20230523PE300-M12_20230526_090339/output/library_result/1/230523PE300-M12_MJ230517P_75/MJ230517P_75_S11_L001_R2_001.fastq.gz",
+        "barcode_config": "/mnt/clustre/users/sanger-dev/wpm2/workspace/20230526/SampleSplit_CF5-20230523PE300-M12_20230526_162805/MetaQc/MJ20230508194--MJ230517P_75.1.all.barcode.txt",
+        "library_number": "MJ230517P_75"
+    }
+}

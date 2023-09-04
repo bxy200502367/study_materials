@@ -1,0 +1,14 @@
+{
+    "id": "data_release-20230729-test02",
+    "type": "workflow",
+    "WPM": true,
+    "wfm_port": "7321",
+    "name": "datasplit_v3.data_release",
+    "client": "client01",
+    "CLUSTER": "clustre",
+	"testmod": true,
+    "IMPORT_REPORT_DATA": true,
+    "options": {
+        "data_release_info": "/mnt/clustre/users/sanger-dev/sg-users/yuan.xu/majorbio_development/data_release/to_file/MJ20211023002_MJ20211023002_559.data_release_info.xls"
+   }
+}

@@ -1,0 +1,4 @@
+source /mnt/lustre/users/sanger-dev/app/bioinfo/dna/new.rc
+alias squeue="squeue -o '%.15i %.15u %.50j %.10T %.10M %R'"
+alias runtoml="python3 ~/sg-users/yiwei.tang/bin/test_helper.py"
+export PATH=/mnt/lustre/users/sanger-dev/sg-users/yiwei.tang/bin:/mnt/lustre/users/sanger-dev/app/bioinfo/dna/ncbi-blast-2.13.0+/bin/:/mnt/lustre/users/sanger-dev/app/bioinfo/dna/phenolyzer-master/:$PATH

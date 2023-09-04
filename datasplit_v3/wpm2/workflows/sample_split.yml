@@ -1,0 +1,143 @@
+name: sample split
+description: |
+  拆分系统sample_split工作流
+options:
+  - name: split_id
+    desc: 拆分的split_id
+    type: string
+    required: True
+  - name: sample_split_info
+    desc: 存放二拆信息的文件,一般名字为specimen_info_list.xls
+    type: string
+    required: True
+  - name: meta_params
+    desc: meta的参数,文件名为meta.json
+    type: string
+    required: True
+diagram: |
+  [*]                        --> pretreatment_sample_info
+  pretreatment_sample_info   --> parallel_meta
+  parallel_meta              --> filearrange
+  filearrange                --> stat_raw_data
+  filearrange                --> stat_clean_data
+  filearrange                --> md5sum_raw_data
+  filearrange                --> md5sum_clean_data
+  md5sum_raw_data            --> [*]
+  md5sum_clean_data          --> [*]
+  stat_raw_data              --> [*]
+  stat_clean_data            --> [*]
+phase_configs:
+  - phase_name: pretreatment_sample_info
+    phase_desc: 把to_file的文件拆分成多个文件
+    name: datasplit_v3.sample_split.datasplit_pretreatment_sample_info
+    option:
+      infile: "{sample_split_info}"
+    log: "Step: pretreatment_sample_info"
+    publish: "sample_split_info"
+  - phase_name: parallel_meta
+    phase_desc: 多样性的并行拆分module
+    name: datasplit_v3.sample_split.parallel_meta
+    type: module
+    option:
+      indir: "{output_dir}/sample_split_info/"
+      meta_params: "{meta_params}"
+    log: "Step: parallel_meta"
+    publish: "meta_result"
+  - phase_name: filearrange
+    phase_desc: 整理结果文件
+    name: datasplit_v3.sample_split.datasplit_sample_split_file_arrange
+    option:
+      indir: "{output_dir}/meta_result"
+      outdir: "{output_dir}"
+    log: "Step: file_arrange"
+  - phase_name: stat_raw_data
+    phase_desc: 统计meta_raw的结果
+    name: datasplit_v3.sample_split.datasplit_fastq_stat
+    option:
+      fastq_list: "{output_dir}/raw_meta_fastq_list.xls"
+      prefix: "meta_raw"
+    log: "Step: stat_meta_raw"
+    publish: ""
+  - phase_name: stat_clean_data
+    phase_desc: 统计meta_clean的结果
+    name: datasplit_v3.sample_split.datasplit_fastq_stat
+    option:
+      fastq_list: "{output_dir}/clean_meta_fastq_list.xls"
+      prefix: "meta_clean"
+    log: "Step: stat_meta_raw"
+    publish: ""
+  - phase_name: md5sum_raw_data
+    phase_desc: 获取raw_data的md5sum的值
+    name: datasplit_v3.sample_split.datasplit_md5sum
+    option:
+      dir: "{output_dir}/meta/meta_raw_data"
+      prefix: "meta_raw_data_md5sum"
+    log: "Step: md5sum_raw_data"
+    publish: ""
+  - phase_name: md5sum_clean_data
+    phase_desc: 获取clean_data的md5sum的值
+    name: datasplit_v3.sample_split.datasplit_md5sum
+    option:
+      dir: "{output_dir}/meta/meta_clean_data"
+      prefix: "meta_clean_data_md5sum"
+    log: "Step: md5sum_clean_data"
+    publish: ""
+upload:
+  - basedir: meta
+import:
+  - api: datasplit_v3.sample_split.sample_split
+    collect: sg_split_library_qc
+    type: add_sg_split_library_qc
+    options:
+      split_id: "{split_id}"
+      library_stat_info_dir: "{output_dir}/library_stat_info"
+  - api: datasplit_v3.sample_split.sample_split
+    collect: sg_split_raw_qc
+    type: add_file_info
+    options:
+      split_id: "{split_id}"
+      process: meta_raw_stat
+      info_file: "{output_dir}/meta_raw.fastq_stat.xls"
+  - api: datasplit_v3.sample_split.sample_split
+    collect: sg_split_clean_qc
+    type: add_file_info
+    options:
+      split_id: "{split_id}"
+      process: meta_clean_stat
+      info_file: "{output_dir}/meta_clean.fastq_stat.xls"
+  - api: datasplit_v3.sample_split.sample_split
+    collect: sg_split_specimen
+    type: update_sample_split_path
+    options:
+      split_id: "{split_id}"
+      process: meta_raw_path
+      info_file: "{output_dir}/raw_meta_fastq_list.xls"
+      s3_upload_dir: "{s3_base_dir}"
+  - api: datasplit_v3.sample_split.sample_split
+    collect: sg_split_specimen
+    type: update_sample_split_path
+    options:
+      split_id: "{split_id}"
+      process: meta_clean_path
+      info_file: "{output_dir}/clean_meta_fastq_list.xls"
+      s3_upload_dir: "{s3_base_dir}"
+  - api: datasplit_v3.sample_split.sample_split
+    collect: sg_split_specimen
+    type: update_sample_split_md5sum
+    options:
+      split_id: "{split_id}"
+      process: meta_raw_data_md5sum
+      info_file: "{output_dir}/meta_raw_data_md5sum.txt"
+  - api: datasplit_v3.sample_split.sample_split
+    collect: sg_split_specimen
+    type: update_sample_split_md5sum
+    options:
+      split_id: "{split_id}"
+      process: meta_clean_data_md5sum
+      info_file: "{output_dir}/meta_clean_data_md5sum.txt"
+  - api: datasplit_v3.sample_split.sample_split
+    collect: sg_split_specimen
+    type: update_no_meta
+    options:
+      split_id: "{split_id}"
+      info_file: "{output_dir}/sample_split_info/no_meta_info.xls"

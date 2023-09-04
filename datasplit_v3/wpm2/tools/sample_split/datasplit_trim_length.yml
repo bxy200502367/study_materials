@@ -1,0 +1,69 @@
+name: trim_length
+description: |
+  拼接前长度过滤
+output: |
+  {lane_name}--{library_number}.trim.1.fq
+  {lane_name}--{library_number}.trim.2.fq
+cpu: 1
+mem: 4G
+queue: chaifen
+global_var:
+  - perl
+  - trim_length
+  - cp
+options:
+  - name: fastq_r1
+    desc: fastq_r1文件
+    type: string
+    required: True
+  - name: fastq_r2
+    desc: fastq_r2文件
+    type: string
+    required: True
+  - name: start_pos
+    type: string
+    required: True
+    default: "1"
+  - name: valid_length
+    type: string
+    required: True
+  - name: min_len
+    type: string
+    required: True
+    default: "0"
+  - name: trim_end_len
+    type: string
+    required: True
+    default: "0"
+  - name: lane_name
+    desc: lane名字
+    type: string
+    required: True
+  - name: library_number
+    type: string
+    required: True
+cmds:
+  - name: run_trim_length_r1
+    shell: True
+    formatter: >
+      {perl} {trim_length} -i {fastq_r1} -o {work_dir}/{lane_name}--{library_number}.trim.1.fq -s {start_pos} -l {valid_length} -m {min_len}
+      -e {trim_end_len}
+    whenif:
+      var: valid_length
+      oprt: "!="
+      value: "pass"
+    whenelse: >
+      {cp} {fastq_r1} {work_dir}/{lane_name}--{library_number}.trim.1.fq
+  - name: run_trim_length_r2
+    shell: True
+    formatter: >
+      {perl} {trim_length} -i {fastq_r2} -o {work_dir}/{lane_name}--{library_number}.trim.2.fq -s {start_pos} -l {valid_length} -m {min_len}
+      -e {trim_end_len}
+    whenif:
+      var: valid_length
+      oprt: "!="
+      value: "pass"
+    whenelse: >
+      {cp} {fastq_r2} {work_dir}/{lane_name}--{library_number}.trim.2.fq
+publish:
+  - pattern: "{lane_name}--{library_number}.trim.*.fq"

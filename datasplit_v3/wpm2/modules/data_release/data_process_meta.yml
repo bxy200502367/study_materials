@@ -1,0 +1,156 @@
+name: data process meta
+description: |
+  单个样本meta的数据释放module
+options:
+  - name: r1_paths_str
+    desc: raw的r1字符串
+    type: string
+    required: True
+  - name: r2_paths_str
+    desc: raw的r2字符串
+    type: string
+    required: True
+  - name: r1_clean_paths_str
+    desc: clean的r1字符串
+    type: string
+    required: True
+  - name: specimen_name
+    desc: 样本名
+    type: string
+    required: True
+  - name: sample_id
+    desc: 样本标识
+    type: string
+    required: True
+  - name: tuple_number
+    desc: 要合并的样本数量
+    type: string
+    required: True
+  - name: rename_st
+    desc: 是否要改名
+    type: string
+    required: True
+  - name: rm_primer_st
+    desc: 是否去去接头去引物
+    type: string
+    required: True
+  - name: sample_rename
+    desc: 要改成的样本名
+    type: string
+    required: True
+  - name: product_type
+    desc: 拆分类型
+    type: string
+    required: True
+  - name: f_barcode
+    desc: f端barcode信息
+    type: string
+    required: True
+  - name: r_barcode
+    desc: r端barcode信息
+    type: string
+    required: True
+  - name: link_primer
+    desc: link_primer序列
+    type: string
+    required: True
+  - name: reverse_primer
+    desc: reverse_primer序列
+    type: string
+    required: True
+diagram: |
+  [*]                               -->   meta_r1_raw_merge
+  [*]                               -->   meta_r2_raw_merge
+  [*]                               -->   meta_clean_merge
+  meta_r1_raw_merge                 -->   meta_rename
+  meta_r2_raw_merge                 -->   meta_rename
+  meta_clean_merge                  -->   meta_rename
+  meta_rename                       -->   remove_raw_barcode_primer
+  meta_rename                       -->   remove_rename_raw_barcode_primer
+  remove_raw_barcode_primer         -->   md5sum
+  remove_rename_raw_barcode_primer  -->   md5sum
+  md5sum                            -->   [*]
+phase_configs:
+  - phase_name: meta_r1_raw_merge
+    phase_desc: meta_r1_raw数据s3路径下载和合并
+    type: module
+    name: datasplit_v3.data_release.data_merge
+    option:
+      paths_str: "{r1_paths_str}"
+      tuple_number: "{tuple_number}"
+      sample_id: "{sample_id}"
+      suffix: "R1.raw.fastq.gz"
+    log: "Step 01: meta_r1_raw数据下载并合并"
+    publish: "01.meta_r1_raw_merge_data"
+  - phase_name: meta_r2_raw_merge
+    phase_desc: meta_r2_raw数据s3路径下载和合并
+    type: module
+    name: datasplit_v3.data_release.data_merge
+    option:
+      paths_str: "{r2_paths_str}"
+      tuple_number: "{tuple_number}"
+      sample_id: "{sample_id}"
+      suffix: "R2.raw.fastq.gz"
+    log: "Step 01: meta_r2_raw数据下载并合并"
+    publish: "01.meta_r2_raw_merge_data"
+  - phase_name: meta_clean_merge
+    phase_desc: meta_clean数据s3路径下载和合并(meta)
+    type: module
+    name: datasplit_v3.data_release.data_merge
+    option:
+      paths_str: "{r1_clean_paths_str}"
+      tuple_number: "{tuple_number}"
+      sample_id: "{sample_id}"
+      suffix: "clean.fastq.gz"
+    log: "Step 01: meta的clean数据下载并合并"
+    publish: "01.meta_clean_merge_data"
+  - phase_name: meta_rename
+    phase_desc: 多样性样本重命名,主要是为了让样本名字变短
+    name: datasplit_v3.data_release.meta_rename
+    option:
+      r1_raw_fastq: "{output_dir}/01.meta_r1_raw_merge_data/merge_fastq/{sample_id}.R1.raw.fastq.gz"
+      r2_raw_fastq: "{output_dir}/01.meta_r2_raw_merge_data/merge_fastq/{sample_id}.R2.raw.fastq.gz"
+      clean_fastq: "{output_dir}/01.meta_clean_merge_data/merge_fastq/{sample_id}.clean.fastq.gz"
+      specimen_name: "{specimen_name}"
+      sample_rename: "{sample_rename}"
+      rename_st: "{rename_st}"
+    log: "Step 02: meta的样本重命名"
+    publish: "{product_type}"
+  - phase_name: remove_raw_barcode_primer
+    phase_desc: raw数据去除接头和引物
+    name: datasplit_v3.data_release.remove_raw_barcode_primer
+    option:
+      f_barcode: "{f_barcode}"
+      r_barcode: "{r_barcode}"
+      link_primer: "{link_primer}"
+      reverse_primer: "{reverse_primer}"
+      fastq_r1: "{output_dir}/{product_type}/{specimen_name}.R1.raw.fastq.gz"
+      fastq_r2: "{output_dir}/{product_type}/{specimen_name}.R2.raw.fastq.gz"
+      sample_name: "{specimen_name}"
+      cut_mode: "primer"
+    log: "Step 03: meta的raw数据去接头去引物(不改名)"
+    publish: "{product_type}"
+    whenif: $judge_run_rename_rm_primer2
+  - phase_name: remove_rename_raw_barcode_primer
+    phase_desc: raw数据去除接头和引物
+    name: datasplit_v3.data_release.remove_raw_barcode_primer
+    option:
+      f_barcode: "{f_barcode}"
+      r_barcode: "{r_barcode}"
+      link_primer: "{link_primer}"
+      reverse_primer: "{reverse_primer}"
+      fastq_r1: "{output_dir}/{product_type}/{sample_rename}.R1.raw.fastq.gz"
+      fastq_r2: "{output_dir}/{product_type}/{sample_rename}.R2.raw.fastq.gz"
+      sample_name: "{sample_rename}"
+      cut_mode: "primer"
+    log: "Step 03: meta的raw数据去接头去引物(改名)"
+    publish: "{product_type}"
+    whenif: $judge_run_rename_rm_primer
+  - phase_name: md5sum
+    phase_desc: rename后文件的md5sum值
+    name: datasplit_v3.data_release.datasplit_md5sum
+    option:
+      dir: "{output_dir}/{product_type}"
+      prefix: "md5sum"
+    log: "开始计算md5sum值"
+    publish: "{product_type}"

@@ -1,0 +1,66 @@
+name: pacbio stat
+type: module
+description: |
+  统计三代拆分结果
+options:
+  - name: bam
+    desc: 要拆分的bam文件
+    type: string
+    required: True
+  - name: adapter
+    desc: 连接序列的fasta文件
+    type: string
+    required: True
+  - name: barcode_file
+    desc: barcode文件
+    type: string
+    required: True
+  - name: sample_sheet
+    desc: 样本信息表
+    type: string
+    required: True
+diagram: |
+  [*]                -->  skera
+  skera              -->  lima
+  lima               -->  pacbio_rename
+  pacbio_rename      -->  multi_bam_to_fq
+  multi_bam_to_fq    -->  multi_pacbio_qc
+  multi_pacbio_qc    -->  [*]
+phase_configs:
+  - phase_name: skera
+    phase_desc: bam文件进行一次拆分
+    name: datasplit_v3.pacbio_split.datasplit_skera
+    option:
+      bam: '{bam}'
+      adapter: '{adapter}'
+    log: "skera文库拆分"
+    publish: "01.skera_result"
+  - phase_name: lima
+    phase_desc: lima进行二拆
+    type: module
+    name: datasplit_v3.pacbio_split.datasplit_pacbio_split_v3
+    option:
+      ccs_bam: '{output_dir}/01.skera_result/mas.bam'
+      sample_sheet: '{sample_sheet}'
+      hifi_preset_mode: ASYMMETRIC
+      source_data: hifi
+    log: "lima样本拆分"
+    publish: "02.lima_result"
+  - phase_name: multi_bam_to_fq
+    phase_desc: 并行bam转fastq
+    type: module
+    name: datasplit_v3.pacbio_split.datasplit_multi_bam_to_fastq_v3
+    option:
+      sample_list: "{sample_list}"
+      split_result_dir: "{output_dir}/02.lima_result/split_result"
+    log: bam转化成fastq文件
+    publish: "03.raw_fastq"
+  - phase_name: multi_pacbio_qc
+    phase_desc: 并行质控
+    type: module
+    name: datasplit_v3.pacbio_split.datasplit_multi_pacbio_qc_v3
+    option:
+      sample_list: "{sample_list}"
+      fastq_result_dir: "{output_dir}/03.raw_fastq"
+    log: 生成长度分布文件
+    publish: "04.clean_fastq"

@@ -1,0 +1,24 @@
+name: file_arrange
+description: |
+  整理一拆的结果
+output: |
+  None
+cpu: 1
+mem: 4G
+queue: chaifen
+global_var:
+  - python3
+  - file_arrange
+options:
+  - name: indir
+    desc: 要整理的文件夹
+    type: string
+    required: True
+  - name: outdir
+    desc: 整理结果文件夹
+    type: string
+    required: True
+cmds:
+  - name: run_file_arrange
+    formatter: >
+        {python3} {file_arrange} --indir {indir} --outdir {outdir}

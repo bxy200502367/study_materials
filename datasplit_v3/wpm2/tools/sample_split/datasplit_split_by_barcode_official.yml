@@ -1,0 +1,61 @@
+name: split_by_barcode_official
+description: |
+  官方多样性文库通过barcode进行拆分
+output: |
+  {lane_name}--{library_number}.trim.merge.split.fq
+cpu: 1
+mem: 4G
+queue: chaifen
+global_var:
+  - perl
+  - split_by_two_barcode_official
+  - split_by_one_barcode_official
+options:
+  - name: fastq
+    desc: fastq文件
+    type: string
+    required: True
+  - name: primer_config
+    desc: primer配置文件
+    type: string
+    required: True
+  - name: mismatch
+    desc: 允许引物错配数
+    type: string
+    required: True
+  - name: lane_name
+    desc: lane名字
+    type: string
+    required: True
+  - name: library_number
+    desc: 文库名字
+    type: string
+    required: True
+  - name: split_type
+    desc: 单双端拆分方式
+    type: string
+    required: True
+    picker:
+      - Pair
+      - Single
+cmds:
+  - name: run_split_by_two_barcode_official
+    shell: True
+    formatter: >
+      {perl} {split_by_two_barcode_official} -i {fastq} -f {primer_config} -l {mismatch} -o {work_dir}/{lane_name}--{library_number}.trim.merge
+    whenif:
+      var: split_type
+      oprt: "=="
+      value: Pair
+    log: 双端barcode获取样本
+  - name: run_split_by_one_barcode_official
+    shell: True
+    formatter: >
+      {perl} {split_by_one_barcode_official} -i {fastq} -f {primer_config} -l {mismatch} -o {work_dir}/{lane_name}--{library_number}.trim.merge
+    whenif:
+      var: split_type
+      oprt: "=="
+      value: Single
+    log: 单端barcode获取样本
+publish:
+  - pattern: "{lane_name}--{library_number}.trim.merge.split.fq"

@@ -1,0 +1,69 @@
+name: datasplit mirna qc
+description: |
+  拆分系统mirna类型的拆分module
+options:
+  - name: mirna_qc_params
+    desc: mirna类型质控的参数
+    type: infile
+    format: datasplit_v3.sample_qc.rna_params
+    required: True
+  - name: fastq_paths
+    desc: 存放样本信息
+    type: string
+    required: True
+  - name: sample_id
+    desc: 样本的标识符号,由specimen_id--library_number--specimen_name--majorbio_name组成
+    type: string
+    required: True
+diagram: |
+  [*]                           --> rna_fastp
+  rna_fastp                     --> [*]
+bindings:
+  length: $mirna_qc_params.length
+  adapter: $mirna_qc_params.adapter
+  phred_score: $mirna_qc_params.phred_score
+  r1_fastq: $get_r1_fastq
+  r2_fastq: $get_r2_fastq
+  specimen_id: $get_specimen_id
+  library_number: $get_library_number
+  specimen_name: $get_specimen_name
+  majorbio_name: $get_majorbio_name
+phase_configs:
+  - phase_name: cut_left
+    phase_desc: mirna切除左边的n个碱基并保留n个bp
+    name: datasplit_v3.sample_qc.datasplit_mirna_qc
+    option:
+      fastq: "{r1_fastq}"
+      cut_left: "{r2_fastq}"
+      length_contain: "{length_required}"
+      sample_id: "{sample_id}"
+      method: seqtk
+    log: "Step: cut_left"
+    publish: 01.raw_75
+  - phase_name: fastx_clipper
+    phase_desc: fastx_clipper对SE序列做去接头的工具
+    name: datasplit_v3.sample_qc.datasplit_fastx_clipper
+    option:
+      cut_fastq: "{output_dir}/01.raw_75/{sample_id}.cut.fastq"
+      length: 18
+      adapter: adapter
+      quality: 35
+      sample_id: "{sample_id}"
+    log: "Step: fastx_clipper"
+    publish: 02.cut_adapter
+  - phase_name: cut_tail
+    phase_desc: 切除尾部的n个碱基
+    name: datasplit_v3.sample_qc.datasplit_cut_tail
+    option:
+      cut_adapter_fastq: "{output_dir}/02.cut_adapter/{sample_id}.cut_tail.fastq"
+      cut_tail: "{cut_tail}"
+      sample_id: "{sample_id}"
+      method: seqtk
+    log: "Step: cut_tail"
+    publish: 03.cut_tail
+  - phase_name: dynamic_trim
+    phase_desc: miRNA质控去低值
+    name: datasplit_v3.sample_qc.datasplit_dynamic_trim
+    option:
+      clip_fastq: "{output_dir}/02.cut_adapter/{sample_id}.cut_tail.fastq"
+  

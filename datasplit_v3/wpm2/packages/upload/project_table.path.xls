@@ -1,0 +1,3 @@
+项目类型	送样名称	合同编号	客户名称	美吉编号	样品名称	引物	引物范围	路径	送测批次	rawdata path	trimdata path	merge	trim	rename
+三代重测序	923235	MJ20230518216	沈华宴	EHE2202037	CM_2B			/mnt/clustre/upload/hiseq/Pacbio/2023-1/MJ20230518216/EHE2202037_CM_2B	Pacbio230619001	/mnt/clustre/upload/hiseq/Pacbio/2023-1/MJ20230518216/EHE2202037_CM_2B/m84070_230612_112111_s4.hifi_reads.bc1002.bam	-	false	false	false
+三代重测序	923234	MJ20230518216	沈华宴	EHE2202036	CM_2			/mnt/clustre/upload/hiseq/Pacbio/2023-1/MJ20230518216/EHE2202036_CM_2	Pacbio230619001	/mnt/clustre/upload/hiseq/Pacbio/2023-1/MJ20230518216/EHE2202036_CM_2/m84070_230612_105005_s3.hifi_reads.bc1003.bam	-	false	false	false

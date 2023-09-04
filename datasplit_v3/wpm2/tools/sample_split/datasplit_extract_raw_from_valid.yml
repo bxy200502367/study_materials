@@ -1,0 +1,37 @@
+name: extract_raw_from_valid
+description: |
+  从valid文件中提取raw的数据
+cpu: 1
+mem: $dynamic_memory
+queue: chaifen
+global_var:
+  - python3
+  - get_raw
+  - mkdir
+options:
+  - name: valid_fastq_r1
+    desc: R1的fastq文件
+    type: string
+    required: True
+  - name: valid_fastq_r2
+    desc: R2的fastq文件
+    type: string
+    required: True
+  - name: seq2sam
+    desc: barcode的配置文件
+    type: string
+    required: True
+  - name: sample_primer_json
+    desc: 样本和引物的对应关系
+    type: string
+    required: True
+cmds:
+  - name: mkdir_raw_dir
+    shell: True
+    formatter: >
+      {mkdir} -p {work_dir}/raw
+    callback: $get_sample_primer
+  - name: run_extract_raw_from_valid
+    formatter: >
+      {python3} {get_raw} --fastq_r1 {valid_fastq_r1} --fastq_r2 {valid_fastq_r2} --seq2sam {seq2sam} --outdir {work_dir}/raw
+    callback: $gunzip_raw

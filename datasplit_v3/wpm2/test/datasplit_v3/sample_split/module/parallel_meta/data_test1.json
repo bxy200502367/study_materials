@@ -1,0 +1,14 @@
+{
+    "id": "parallel_meta-20230531_test14",
+    "type": "module",
+    "WPM": true,
+    "wfm_port": "7321",
+    "name": "datasplit_v3.sample_split.parallel_meta",
+    "client": "client01",
+    "CLUSTER": "clustre",
+    "IMPORT_REPORT_DATA": true,
+    "options": {
+        "indir": "/mnt/clustre/users/sanger-dev/sg-users/yuan.xu/majorbio_development/datasplit_v3/sample_split/to_file/20230531_test/sample_info_dir/",
+        "meta_params": "/mnt/clustre/users/sanger-dev/sg-users/yuan.xu/majorbio_development/datasplit_v3/sample_split/to_file/20230531_test/meta.json"
+   }
+}

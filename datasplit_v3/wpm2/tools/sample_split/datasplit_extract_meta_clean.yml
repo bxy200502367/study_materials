@@ -1,0 +1,41 @@
+name: extract_meta_clean
+description: |
+  从valid文件中提取clean的数据
+cpu: 2
+mem: $dynamic_memory
+queue: chaifen
+global_var:
+  - python3_all
+  - mkdir
+  - get_clean
+  - gzip
+  - cp
+options:
+  - name: in_fastq
+    desc: fastq文件
+    type: infile
+    format: datasplit_v3.sample_split.fastq
+    required: True
+  - name: sample_primer_json
+    desc: 样本和引物的对应关系
+    type: string
+    required: True
+bindings:
+    fastqsize: $in_fastq.filesize
+cmds:
+  - name: mkdir_meta_clean_dir
+    shell: True
+    formatter: >
+      {mkdir} -p {work_dir}/clean
+  - name: run_extract_meta_clean
+    shell: True
+    formatter: >
+      {python3_all} {get_clean} --infile {in_fastq} --sample_primer_json {sample_primer_json} --outdir {work_dir}/clean
+      <--##-->
+      {gzip} {work_dir}/clean/*
+    whenif:
+      var: fastqsize
+      oprt: ">"
+      value: 0
+publish:
+  - pattern: "clean/*"

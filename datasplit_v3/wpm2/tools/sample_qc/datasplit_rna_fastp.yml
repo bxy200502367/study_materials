@@ -1,0 +1,86 @@
+name: run rna fastp
+description: |
+  rna质控
+output: |
+  {specimen_id}--{library_number}--{specimen_name}.clean.1.fastq.gz
+  {specimen_id}--{library_number}--{specimen_name}.clean.2.fastq.gz
+  {specimen_id}--{library_number}--{specimen_name}.json
+cpu: 8
+mem: 10G
+queue: chaifen
+global_var:
+  - fastp
+options:
+  - name: fastq_r1
+    desc: R1的fastq文件
+    type: string
+    required: True
+  - name: fastq_r2
+    desc: R2的fastq文件
+    type: string
+    required: True
+  - name: length_required
+    desc: -l,长度过滤参数，比此值短的读取将被丢弃
+    type: string
+    required: True
+  - name: cut_by_quality5
+    desc: -5,根据前面(5 ')的质量，允许每个读切割，默认是禁用的
+    type: string
+    required: True
+  - name: cut_by_quality3
+    desc: -3,根据后面(3 ')的质量，允许每个读切割，默认是禁用的
+    type: string
+    required: True
+  - name: cut_mean_quality
+    desc: -M
+    type: string
+    required: True
+  - name: n_base_limit
+    desc: -n
+    type: string
+    required: True
+  - name: qualified_quality_phred
+    desc: -q
+    type: string
+    required: True
+  - name: adapter_sequence
+    desc: adapter_sequence
+    type: string
+    required: True
+  - name: adapter_sequence_r2
+    desc: adapter_sequence_r2
+    type: string
+    required: True
+  - name: specimen_id
+    desc: specimen_id
+    type: string
+    required: True
+  - name: library_number
+    desc: library_number
+    type: string
+    required: True
+  - name: specimen_name
+    desc: specimen_name
+    type: string
+    required: True
+  - name: compression
+    desc: z,gzip输出的压缩级别(1 ~ 9). 1是最快的，9是最小的
+    type: int
+    default: 6
+  - name: thread
+    desc: -w,线程数
+    type: int
+    default: 8
+cmds:
+  - name: run_rna_fastp
+    formatter: >
+        {fastp} -i {fastq_r1} -I {fastq_r2} -o {work_dir}/{specimen_id}--{library_number}--{specimen_name}.clean.1.fastq.gz 
+        -O {work_dir}/{specimen_id}--{library_number}--{specimen_name}.clean.2.fastq.gz -l {length_required} -5 {cut_by_quality5} 
+        -3 {cut_by_quality3} -M {cut_mean_quality} -q {qualified_quality_phred} -n {n_base_limit} 
+        -j {work_dir}/{specimen_id}--{library_number}--{specimen_name}.json
+        -h {work_dir}/{specimen_id}--{library_number}--{specimen_name}.html --adapter_sequence {adapter_sequence} 
+        --adapter_sequence_r2 {adapter_sequence_r2} -z {compression} -w {thread}
+publish:
+  - pattern: "{specimen_id}--{library_number}--{specimen_name}.clean.1.fastq.gz"
+  - pattern: "{specimen_id}--{library_number}--{specimen_name}.clean.2.fastq.gz"
+  - pattern: "{specimen_id}--{library_number}--{specimen_name}.json"

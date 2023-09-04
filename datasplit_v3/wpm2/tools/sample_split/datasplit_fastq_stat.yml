@@ -1,0 +1,32 @@
+name: fastq_stat
+description: |
+  统计fastq文件
+output: |
+  {prefix}.fastq_stat.xls
+cpu: 10
+mem: 80G
+queue: chaifen
+global_var:
+  - java
+  - sed
+  - fastq_stat
+options:
+  - name: fastq_list
+    desc: R1的fastq文件列表
+    type: string
+    required: True
+  - name: prefix
+    desc: 文件前缀
+    type: string
+    required: True
+cmds:
+  - name: run_fastq_stat
+    shell: True
+    formatter: >
+        {java} -jar {fastq_stat} -i {fastq_list} -t 10 > {work_dir}/{prefix}.fastq_stat.xls
+        <--##-->
+        {sed} -i 's/#//' {work_dir}/{prefix}.fastq_stat.xls
+        <--##-->
+        {sed} -i 's/%//g' {work_dir}/{prefix}.fastq_stat.xls
+publish: 
+  - pattern: "{prefix}.fastq_stat.xls"

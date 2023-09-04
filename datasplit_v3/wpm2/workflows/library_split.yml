@@ -1,0 +1,100 @@
+name: library split
+description: |
+  拆分系统library_split工作流
+options:
+  - name: split_id
+    desc: 拆分的split_id
+    type: string
+    required: True
+  - name: library_info_dir
+    desc: 存放一拆信息的文件夹
+    type: infile
+    format: datasplit_v3.library_split.library_info_dir
+    required: True
+  - name: all_sample_info
+    desc: 所有样本的信息,主要是为了检查样本的barcode重复问题
+    type: infile
+    format: datasplit_v3.library_split.all_sample_info
+    required: True
+  - name: self_library_info
+    desc: 纯文库的信息, 主要用于纯文库改名
+    type: string
+    required: True
+diagram: |
+  [*]                   --> parallel_bcl_to_fastq
+  parallel_bcl_to_fastq --> FileArrange
+  FileArrange           --> RenameSelfLibrary
+  RenameSelfLibrary     --> [*]
+phase_configs:
+  - phase_name: parallel_bcl_to_fastq
+    phase_desc: 一拆的并行bcl_to_fastq
+    name: datasplit_v3.library_split.parallel_bcl_to_fastq
+    type: module
+    option:
+      library_info_dir: "{library_info_dir}"
+    log: "Step: bcl_to_fastq"
+    publish: "temp_out"
+  - phase_name: FileArrange
+    phase_desc: 整理结果文件
+    name: datasplit_v3.library_split.datasplit_file_arrange
+    option:
+      indir: "{output_dir}/temp_out"
+      outdir: "{output_dir}/library_result"
+    log: "Step: file_arrange"
+  - phase_name: RenameSelfLibrary
+    phase_desc: 重命名纯文库的
+    name: datasplit_v3.library_split.datasplit_rename_self_library
+    option:
+      self_library_info: "{self_library_info}"
+      indir: "{output_dir}/library_result"
+    whenif: $exist_self_library
+    log: "Step: rename_self_library"
+upload:
+  - basedir: library_result
+import:
+  - api: datasplit_v3.library_split.library_split
+    collect: sg_split
+    type: update_sg_split
+    options:
+      split_id: "{split_id}"
+      library_split_workspace: "{work_dir}"
+  - api: datasplit_v3.library_split.library_split
+    collect: sg_split_summary
+    type: add_sg_split_summary
+    options:
+      split_id: "{split_id}"
+      library_result_dir: "{output_dir}/temp_out"
+  - api: datasplit_v3.library_split.library_split
+    collect: sg_split_lane_summary
+    type: add_sg_split_lane_summary
+    options:
+      split_id: "{split_id}"
+      library_result_dir: "{output_dir}/temp_out"
+  - api: datasplit_v3.library_split.library_split
+    collect: sg_split_lane_summary_detail
+    type: add_sg_split_lane_summary_detail
+    options:
+      split_id: "{split_id}"
+      library_result_dir: "{output_dir}/temp_out"
+  - api: datasplit_v3.library_split.library_split
+    collect: sg_split_unknow_barcode
+    type: add_sg_split_unknow_barcode
+    options:
+      split_id: "{split_id}"
+      library_result_dir: "{output_dir}/temp_out"
+  - api: datasplit_v3.library_split.library_split
+    collect: sg_split_library
+    type: update_sg_split_library
+    options:
+      split_id: "{split_id}"
+      library_result_dir: "{output_dir}/library_result"
+      library_info_dir: "{library_info_dir}"
+      s3_upload_dir: "{s3_base_dir}"
+  - api: datasplit_v3.library_split.library_split
+    collect: sg_split_specimen
+    type: update_sg_split_specimen
+    options:
+      split_id: "{split_id}"
+      library_result_dir: "{output_dir}/library_result"
+      library_info_dir: "{library_info_dir}"
+      s3_upload_dir: "{s3_base_dir}"

@@ -1,0 +1,69 @@
+name: pacbio stat
+type: module
+description: |
+  统计三代拆分结果
+options:
+  - name: raw_fastq_dir
+    desc: 质控前fastq文件夹
+    type: string
+    required: True
+  - name: clean_fastq_dir
+    desc: 质控后fastq文件夹
+    type: string
+    required: True
+  - name: lima_summary_file
+    desc: lima拆分的统计文件
+    type: string
+    required: True
+diagram: |
+  [*]                -->  stat_raw
+  [*]                -->  stat_clean
+  [*]                -->  stat_lima_summary
+  [*]                -->  stat_len
+  stat_len           -->  len_distribution
+  stat_raw           -->   [*]
+  stat_clean         -->   [*]
+  stat_lima_summary  -->   [*]
+  len_distribution   -->   [*]
+phase_configs:
+  - phase_name: stat_raw
+    phase_desc: 质控前的fastq统计
+    name: datasplit_v3.pacbio_split.datasplit_pacbio_fastq_stat_v3
+    option:
+      fastq_dir: '{raw_fastq_dir}'
+      match_pattern: '*.ccs.fastq.gz'
+      output_file: raw_fastq_stat.xls
+    log: "质控前数据量统计"
+    publish: ""
+  - phase_name: stat_clean
+    phase_desc: 质控后的fastq统计
+    name: datasplit_v3.pacbio_split.datasplit_pacbio_fastq_stat_v3
+    option:
+      fastq_dir: '{clean_fastq_dir}'
+      match_pattern: '*.value.fastq.gz'
+      output_file: clean_fastq_stat.xls
+    log: "质控后数据量统计"
+    publish: ""
+  - phase_name: stat_lima_summary
+    phase_desc: 统计lima结果
+    name: datasplit_v3.pacbio_split.datasplit_lima_summary_v3
+    option:
+      lima_summary_file: '{lima_summary_file}'
+    log: 统计lima结果
+    publish: ""
+  - phase_name: stat_len
+    phase_desc: 统计fastq长度
+    name: datasplit_v3.pacbio_split.pacbio_stat_len
+    option:
+      fastq_dir: "{raw_fastq_dir}"
+      match_pattern: "*.ccs.fastq.gz"
+      output_file: raw_fastq_len_stat.xls
+    log: 每条read的长度统计
+    publish: ""
+  - phase_name: len_distribution
+    phase_desc: 分布统计文件生成
+    name: datasplit_v3.pacbio_split.pacbio_len_distribution
+    option:
+      len_file: "{output_dir}/raw_fastq_len_stat.xls"
+    log: 生成长度分布文件
+    publish: ""
