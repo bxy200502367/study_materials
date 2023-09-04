@@ -119,7 +119,7 @@ class MetaNoOfficialInfoFile(File):
             else:
                 raise FileError("its_primer 传参既不是yes也不是no")
         else:
-            self.set_property("its_primer", "no")
+            self.set_property("its_primer", "yes")
         self.set_property("trim_max_length", trim_max_length)
         self.set_property("trim_min_length", trim_min_length)
         #self.set_property("its_primer", its_primer)

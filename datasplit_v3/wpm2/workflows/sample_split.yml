@@ -32,17 +32,17 @@ phase_configs:
     name: datasplit_v3.sample_split.datasplit_pretreatment_sample_info
     option:
       infile: "{sample_split_info}"
-    log: "Step: pretreatment_sample_info"
-    publish: "sample_split_info"
+    log: "Step 01: pretreatment_sample_info"
+    publish: "01.sample_split_info"
   - phase_name: parallel_meta
     phase_desc: 多样性的并行拆分module
     name: datasplit_v3.sample_split.parallel_meta
     type: module
     option:
-      indir: "{output_dir}/sample_split_info/"
+      indir: "{output_dir}/01.sample_split_info/"
       meta_params: "{meta_params}"
-    log: "Step: parallel_meta"
-    publish: "meta_result"
+    log: "Step 02: parallel_meta"
+    publish: "02.meta_result"
   - phase_name: filearrange
     phase_desc: 整理结果文件
     name: datasplit_v3.sample_split.datasplit_sample_split_file_arrange

@@ -61,4 +61,58 @@
 - update: 更新表信息
 ### phase_configs: 步骤
 - pretreatment_sample_info: 把样本信息表拆开
+  - tool:datasplit_pretreatment_sample_info
+    - package:pretreatment_sample_info.py
+    - 输入: infile
+    - 输出: no_meta_info.xls
+    - 输出: meta_official_info.xls
+    - 输出: meta_no_official_info.xls
+    - 输出: meta_official
+    - 输出: meta_no_official
 - parallel_meta: 并行拆分多样性样本
+  - module: parallel_meta
+    - 输入: indir(file.sample_info_dir)
+      - has_meta_official: 是否存在官方多样性样本
+      - has_meta_no_official: 是否存在非官方多样性样本
+    - 输入: meta_params(file.meta_params)
+      - length_required
+      - cut_by_quality5
+      - cut_by_quality3
+      - cut_right_window_size
+      - cut_right_mean_quality
+      - min_length
+      - max_length
+      - mismatch_rate
+      - valid_length
+      - min_len
+      - mismatch
+      - split_type
+    - 输出:{lane_name}--{library_number}
+    - module: datasplit_meta_official
+      - 输入: meta_official_info(file.meta_official_info)
+        - lane_name
+        - library_number
+        - fastq_r1_path
+        - fastq_r2_path
+        - trim_max_length
+        - trim_min_length
+        - its_primer
+        - split_method
+      - 输入: length_required
+      - 输入: cut_by_quality5
+      - 输入: cut_by_quality3
+      - 输入: cut_right_mean_quality
+      - 输入: cut_right_window_size
+      - 输入: min_length
+      - 输入: max_length
+      - 输入: mismatch_rate
+      - 输入: valid_length
+      - 输入: min_len
+      - 输入: mismatch
+      - 输入: split_type
+    - module: datasplit_meta_no_official
+- filearrange: 整理文件结果
+- stat_raw_data: 统计meta_raw的结果
+- stat_clean_data: 统计meta_clean的结果
+- md5sum_raw_data: 获取raw_data的md5sum的值
+- md5sum_clean_data: 获取clean_data的md5sum值
